@@ -1,23 +1,27 @@
-# IDA BugFix
+# IDA BugFix 2.0.9
 
-Outil web indépendant d'analyse statique de dépôts GitHub publics et d'audit de sites web.
+Plateforme web de diagnostic : dépôts GitHub publics, projets ZIP locaux et audits web via Google PageSpeed Insights / Lighthouse.
 
-## Mode 1 — Dépôt GitHub
-- Analyse de dépôts publics via l'API GitHub.
+## Nouveautés 2.0.9 — Analyse de projets ZIP
+- Import d’une archive ZIP depuis mobile ou ordinateur.
+- Analyse directement dans le navigateur : les fichiers ne sont pas téléversés.
+- Inspection statique de JavaScript, TypeScript, JSON, HTML, CSS, Python, PHP, Java, Go, Rust, SQL, YAML, TOML, Markdown, XML, Vue et Svelte.
+- Détection heuristique de secrets potentiels, eval(), innerHTML, traces console, TODO/FIXME, URLs localhost, JSON invalide et gestion fetch à vérifier.
+- Rapport JSON exportable avec gravité, emplacement, résumé et recommandations.
+- Limites : ZIP 30 Mo, 300 fichiers candidats, 1 Mo par fichier, 25 Mo de texte traité.
+- Exclusion des dossiers de dépendances et de compilation courants.
+
+## Modes existants
+### GitHub public
 - Inspection limitée à 60 fichiers texte de 150 Ko maximum.
-- Recherche de motifs suspects : secrets, eval(), innerHTML, traces console, TODO/FIXME et URL localhost.
-- Vérification de syntaxe JSON et export d'un rapport JSON.
-- Aucun code distant exécuté, aucun fichier distant modifié.
-
-## Mode 2 — Site web
-- Audit d'une URL publique via Google PageSpeed Insights / Lighthouse.
-- Scores Performance, Accessibilité, Bonnes pratiques et SEO.
-- Indicateurs de chargement et diagnostics à examiner.
-- Choix mobile ou ordinateur et export du rapport JSON.
-- Une clé API Google peut être nécessaire selon les quotas. La clé saisie reste dans la page et n'est pas enregistrée par IDA BugFix.
+- Aucun code distant exécuté et aucun fichier distant modifié.
+### Audit web
+- Google PageSpeed Insights / Lighthouse : performances, accessibilité, bonnes pratiques et SEO.
+- Le site doit être public. Une clé API Google peut être nécessaire selon les quotas.
+- L’URL du site est transmise à Google PageSpeed Insights.
 
 ## Limites et sécurité
-L'analyse GitHub est heuristique et ne remplace pas les tests ou une revue humaine. L'audit web dépend de Google PageSpeed Insights et de l'accessibilité du site. Les scores varient selon le réseau, l'appareil et le moment. Aucun site ni dépôt n'est modifié. L'URL du site est transmise à Google PageSpeed Insights pour réaliser le test.
+La version 2.0.9 est un outil de diagnostic statique. Elle ne comprend pas toutes les erreurs possibles, ne modifie pas le code, n’exécute pas les tests et ne garantit pas l’absence de bugs. Les alertes sont des pistes à vérifier. Le mode ZIP utilise JSZip chargé depuis jsDelivr ; une connexion est nécessaire pour charger cette bibliothèque. Les fichiers de l’archive restent dans le navigateur pendant l’analyse.
 
-## Lancement
-Ouvrir index.html ou publier le dépôt avec GitHub Pages.
+## Utilisation
+Ouvrir l’application, choisir GitHub, Projet ZIP ou Audit web, puis lancer l’analyse.
