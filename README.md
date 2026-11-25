@@ -26,13 +26,15 @@ Les règles de secrets et les alertes de code restent des détections statiques 
 L'analyse ZIP vérifie les tailles décompressées déclarées par l'archive avant de lire les fichiers et refuse les entrées dépassant les limites configurées.
 
 ## Activation cloud
-1. Créer un projet Supabase dédié à IDA BugFix (ne pas réutiliser les identifiants d'un autre projet).
-2. Exécuter `supabase/schema.sql` dans l'éditeur SQL du nouveau projet.
-3. Dans IDA BugFix, renseigner l'URL du projet et sa clé publique (publishable ou anon).
-4. Créer un compte puis se connecter. Les nouveaux rapports seront synchronisés après connexion.
+Le projet Supabase dédié à IDA BugFix et son schéma SQL sont déjà configurés. Ne créez pas un second projet et ne remplacez pas ces identifiants sans raison.
+
+1. Ouvrir la [configuration Auth du projet IDA BugFix](https://supabase.com/dashboard/project/jahqximmxhycoslprifl/auth/url-configuration).
+2. Définir **Site URL** et ajouter comme URL de redirection autorisée : `https://padrav223.github.io/ida-bugfix/`.
+3. Ouvrir IDA BugFix, conserver l'URL et la clé publique préremplies, puis créer un compte.
+4. Confirmer l'adresse e-mail si Supabase le demande, puis se connecter. Les nouveaux rapports locaux seront synchronisés après connexion.
 5. Pour attribuer une formule Pro/Team, l'administrateur doit mettre à jour la licence depuis un environnement serveur protégé.
 
-La configuration Supabase saisie dans le navigateur est conservée localement. Ne jamais utiliser une clé `service_role` ou une clé secrète dans le navigateur.
+La configuration reste dans le navigateur. Ne jamais utiliser une clé `service_role` ou une clé secrète dans le navigateur.
 
 ## Ce qui n'est pas encore activé
 - Le projet Supabase dédié IDA BugFix est préconfiguré dans l'application. Aucun compte cloud n'est créé automatiquement.
