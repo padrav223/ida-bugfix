@@ -19,11 +19,11 @@
       if(scripts.typecheck)checks.push(manager==="npm"?"npm run typecheck":manager+" typecheck");
       add("JavaScript / Node.js",install,tests?[tests]:[],checks,tests?[]:["Aucun script de test explicite détecté dans package.json."]);
     }
-    if(has("pyproject.toml")||has("requirements.txt")||names.some(p=>/\.py$/i.test(p))){
-      const config=get("pyproject.toml"),req=get("requirements.txt")+"\n"+get("requirements-dev.txt");
+    if(has("pyproject.toml")||names.some(p=>/requirements(?:-[a-z0-9_.-]+)?\.txt$/i.test(p))||names.some(p=>/\.py$/i.test(p))){
+      const config=get("pyproject.toml"),req=names.filter(p=>/requirements(?:-[a-z0-9_.-]+)?\.txt$/i.test(p)).map(p=>byPath.get(p)).join("\n"),reqFile=names.find(p=>/requirements(?:-[a-z0-9_.-]+)?\.txt$/i.test(p));
       const pytest=/pytest/i.test(config+" "+req)||has("pytest.ini")||has("conftest.py");
       const tests=pytest?["python -m pytest -q"]:["python -m unittest discover -v"];
-      const install=has("requirements.txt")?"python -m pip install -r requirements.txt":has("pyproject.toml")?"python -m pip install -e .":"";
+      const install=reqFile?"python -m pip install -r "+reqFile:has("pyproject.toml")?"python -m pip install -e .":"";
       add("Python",install,tests,[],pytest?[]:["Pytest non détecté : unittest est proposé par défaut."]);
     }
     if(has("go.mod"))add("Go","go mod download",["go test ./..."],["go vet ./..."]);
