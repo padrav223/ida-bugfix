@@ -1,24 +1,23 @@
 # IDA BugFix
 
-Outil web indépendant de diagnostic statique de dépôts GitHub publics, en français et adapté au mobile.
+Outil web indépendant d'analyse statique de dépôts GitHub publics et d'audit de sites web.
 
-## Fonctionnement actuel
+## Mode 1 — Dépôt GitHub
+- Analyse de dépôts publics via l'API GitHub.
+- Inspection limitée à 60 fichiers texte de 150 Ko maximum.
+- Recherche de motifs suspects : secrets, eval(), innerHTML, traces console, TODO/FIXME et URL localhost.
+- Vérification de syntaxe JSON et export d'un rapport JSON.
+- Aucun code distant exécuté, aucun fichier distant modifié.
 
-- Récupère les métadonnées et l'arborescence d'un dépôt public via l'API GitHub.
-- Inspecte jusqu'à 60 fichiers texte de 150 Ko maximum, en donnant la priorité aux fichiers `.env` (hors modèles d'exemple) et à `package.json`.
-- Recherche certains motifs : secrets potentiellement exposés, `eval()`, `innerHTML`, traces console, TODO/FIXME et URL localhost.
-- Vérifie la syntaxe des fichiers JSON.
-- Exporte un rapport JSON.
-- N'exécute aucun code du dépôt et ne modifie aucun fichier distant.
+## Mode 2 — Site web
+- Audit d'une URL publique via Google PageSpeed Insights / Lighthouse.
+- Scores Performance, Accessibilité, Bonnes pratiques et SEO.
+- Indicateurs de chargement et diagnostics à examiner.
+- Choix mobile ou ordinateur et export du rapport JSON.
+- Une clé API Google peut être nécessaire selon les quotas. La clé saisie reste dans la page et n'est pas enregistrée par IDA BugFix.
 
-## Limites importantes
-
-C'est une première analyse statique heuristique, pas un moteur IA ni un remplacement de tests, ESLint, TypeScript ou d'une revue humaine. Les résultats peuvent contenir des faux positifs et ne garantissent pas l'absence de bugs. Les dépôts privés, les gros dépôts et les analyses complètes ne sont pas pris en charge.
-
-## Sécurité
-
-Le code du dépôt est traité comme une donnée non fiable. Aucun token, mot de passe ou clé API n'est demandé. L'analyse s'effectue depuis le navigateur et n'exécute pas le code inspecté.
+## Limites et sécurité
+L'analyse GitHub est heuristique et ne remplace pas les tests ou une revue humaine. L'audit web dépend de Google PageSpeed Insights et de l'accessibilité du site. Les scores varient selon le réseau, l'appareil et le moment. Aucun site ni dépôt n'est modifié. L'URL du site est transmise à Google PageSpeed Insights pour réaliser le test.
 
 ## Lancement
-
-Ouvrir `index.html` ou publier le dépôt avec GitHub Pages.
+Ouvrir index.html ou publier le dépôt avec GitHub Pages.
