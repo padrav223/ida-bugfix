@@ -164,3 +164,21 @@ footer a{color:#287844}
  .pro-filter-bar{flex-direction:column}
  .pro-filter-bar input,.pro-filter-bar select{width:100%;flex:auto}
 }
+
+
+/* IDA BugFix 2.2.0 — SaaS foundation */
+.cloud-config-grid,.cloud-auth-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}
+.cloud-config-grid label,.cloud-auth-grid label{display:grid;gap:7px;color:var(--text);font-size:12px;font-weight:650}
+.cloud-config-grid input,.cloud-auth-grid input{width:100%;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--text);font:inherit;font-weight:400}
+.cloud-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.cloud-dashboard{display:flex;justify-content:space-between;gap:12px;padding:15px;margin:16px 0;border:1px solid var(--line);border-radius:11px;background:var(--panel2)}
+.cloud-dashboard b,.cloud-dashboard small{display:block}.cloud-dashboard small{margin-top:4px;color:var(--muted);font-size:11px}
+.fix-plan{display:grid;gap:9px;margin:18px 0}
+.fix-plan article,.execution-status,.license-grid article{padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.fix-plan article b,.fix-plan article small,.license-grid article b,.license-grid article strong,.license-grid article small{display:block}
+.fix-plan article small,.execution-status p,.license-grid article small{margin-top:6px;color:var(--muted);font-size:11px;line-height:1.6}
+.execution-status{margin:16px 0}.execution-status>span{float:right}
+.badge-pending{font-size:10px;color:#87641e;background:#fbf2dc;padding:5px 8px;border-radius:20px}
+.license-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}
+.license-grid article strong{margin-top:9px;font-size:13px}
+@media(max-width:650px){.cloud-config-grid,.cloud-auth-grid,.license-grid{grid-template-columns:1fr}.cloud-dashboard{flex-direction:column}.execution-status>span{float:none;display:inline-block;margin-top:8px}}
