@@ -56,3 +56,18 @@ test("signale proprement l'absence de fichier de verrouillage reconnu", async ()
   assert.equal(result.packages, 0);
   assert.equal(result.findings.length, 0);
 });
+
+test("analyse aussi les fichiers requirements de développement", async () => {
+  let sentBody;
+  const engine = loadEngine(async (_url, options) => {
+    sentBody = JSON.parse(options.body);
+    return { ok: true, json: async () => ({ results: [{ vulns: [] }] }) };
+  });
+  const result = await engine.auditDependencies([{
+    path: "requirements-dev.txt",
+    content: "flask==2.0.0\npytest==7.0.0\n"
+  }]);
+  assert.equal(result.packages, 2);
+  assert.equal(sentBody.queries.length, 2);
+  assert.equal(sentBody.queries[0].package.ecosystem, "PyPI");
+});
