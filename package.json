@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "check": "node --check app.js && node --check zip-scan.js && node --check cloud.js && node --check fix-advisor.js && node --check security-engine.js && node --check ast-engine.js && node --check sarif.js"
+    "check": "node --check app.js && node --check zip-scan.js && node --check cloud.js && node --check fix-advisor.js && node --check security-engine.js && node --check ast-engine.js && node --check test-planner.js && node --check sarif.js"
   },
   "dependencies": {
     "acorn": "8.15.0"

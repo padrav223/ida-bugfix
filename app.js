@@ -4,7 +4,8 @@ let lastReport = null;
 const MAX_FILES = 60, MAX_FILE_BYTES = 150000, MAX_LOCK_FILE_BYTES = 1500000;
 const SECRET_FILE = /^\.env(?:\.(?!example$|sample$|template$)[a-z0-9_-]+)?$/i;
 const LOCK_FILE = /(?:^|\/)(?:package-lock\.json|npm-shrinkwrap\.json|requirements(?:-[a-z0-9_.-]+)?\.txt|go\.mod|cargo\.lock|composer\.lock)$/i;
-const TEXT_EXT = /\.(?:js|jsx|ts|tsx|mjs|cjs|json|html|css|scss|md|yml|yaml|toml|py|php|java|go|rs|sql|sh|txt|mod|lock)$/i;
+const BUILD_WRAPPER = /(?:^|\/)(?:mvnw|gradlew)$/i;
+const TEXT_EXT = /\.(?:js|jsx|ts|tsx|mjs|cjs|json|html|css|scss|md|yml|yaml|toml|py|php|java|go|rs|sql|sh|txt|mod|lock|gradle|kts)$/i;
 function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function parseRepoUrl(value){
   let u; try{u=new URL(value)}catch{throw Error("Adresse invalide. Collez une URL GitHub complète.");}
@@ -64,7 +65,7 @@ async function runScan(url){
   const branch=repoInfo.default_branch;
   const tree=await githubJSON(base+"/git/trees/"+encodeURIComponent(branch)+"?recursive=1");
   if(tree.truncated)throw Error("Le dépôt est trop volumineux pour une analyse complète via cette version. Analyse interrompue pour éviter un résultat trompeur.");
-  const candidates=(tree.tree||[]).filter(x=>x.type==="blob"&&(TEXT_EXT.test(x.path)||SECRET_FILE.test(x.path.split("/").pop())||LOCK_FILE.test(x.path))&&(LOCK_FILE.test(x.path)?x.size<=MAX_LOCK_FILE_BYTES:x.size<=MAX_FILE_BYTES)&&!/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git)(?:\/|$)/.test(x.path));
+  const candidates=(tree.tree||[]).filter(x=>x.type==="blob"&&(TEXT_EXT.test(x.path)||SECRET_FILE.test(x.path.split("/").pop())||LOCK_FILE.test(x.path)||BUILD_WRAPPER.test(x.path))&&(LOCK_FILE.test(x.path)?x.size<=MAX_LOCK_FILE_BYTES:x.size<=MAX_FILE_BYTES)&&!/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git)(?:\/|$)/.test(x.path));
   candidates.sort((a,b)=>{const rank=x=>SECRET_FILE.test(x.path.split("/").pop())?0:(x.path==="package.json"||LOCK_FILE.test(x.path))?1:2;return rank(a)-rank(b)||a.path.localeCompare(b.path);});
   const selected=candidates.slice(0,MAX_FILES), findings=[], sourceFiles=[],astStats={filesParsed:0,filesSkipped:0,nodes:0};
   let read=0, skipped=Math.max(0,candidates.length-selected.length);
@@ -76,6 +77,8 @@ async function runScan(url){
       $("analysisSubtitle").textContent="Inspection : "+read+"/"+selected.length+" fichiers";
     }catch(e){/* un fichier inaccessible n'interrompt pas les autres */}
   }
+  const testPlan=window.IDATestPlanner?window.IDATestPlanner.plan(sourceFiles):{steps:[],execution:"not_run",warning:"Moteur de planification indisponible."};
+  $("testPlanNotice").textContent=testPlan.steps.length?"Plan de tests suggéré (non exécuté) : "+testPlan.steps.map(x=>x.ecosystem+" — "+[x.install,...x.tests,...x.checks].filter(Boolean).join(" → ")).join(" | "):"Aucun plan de tests automatique reconnu. "+testPlan.warning;
   const packageItem=selected.find(x=>x.path==="package.json");
   let scripts=[];
   if(packageItem){try{const r=await fetch("https://raw.githubusercontent.com/"+owner+"/"+repo+"/"+branch+"/package.json");const pkg=await r.json();scripts=Object.keys(pkg.scripts||{});}catch{}}
@@ -84,7 +87,7 @@ async function runScan(url){
   if(!read)findings.push(finding("info","Aucun fichier texte analysable","—",0,"Aucun fichier compatible n'a pu être récupéré dans les limites définies.","Vérifier la visibilité du dépôt et les types de fichiers."));
   if(!findings.length)findings.push(finding("info","Aucun problème détecté par les règles activées","—",0,"L'analyse statique limitée n'a pas trouvé les motifs recherchés. Cela ne garantit pas l'absence de bugs.","Exécuter les tests du projet et faire une revue humaine."));
   const counts={critical:0,high:0,medium:0,low:0,info:0};findings.forEach(f=>counts[f.level]=(counts[f.level]||0)+1);
-  const summary={version:"2.4.0",repository:owner+"/"+repo,branch,filesRead:read,filesConsidered:selected.length,filesSkipped:skipped,counts,findings,engines:{static:"IDA rules",secrets:"IDA Secret Rules",ast:"Acorn AST",astFilesParsed:astStats.filesParsed,astFilesSkipped:astStats.filesSkipped,astNodes:astStats.nodes,dependencies:"OSV.dev",dependencyPackages:dependencyAudit.packages,dependencyStatus:dependencyAudit.status},generatedAt:new Date().toISOString(),scripts};
+  const summary={version:"2.4.0",repository:owner+"/"+repo,branch,filesRead:read,filesConsidered:selected.length,filesSkipped:skipped,counts,findings,engines:{static:"IDA rules",secrets:"IDA Secret Rules",ast:"Acorn AST",astFilesParsed:astStats.filesParsed,astFilesSkipped:astStats.filesSkipped,astNodes:astStats.nodes,dependencies:"OSV.dev",dependencyPackages:dependencyAudit.packages,dependencyStatus:dependencyAudit.status},testPlan,generatedAt:new Date().toISOString(),scripts};
   lastReport=summary;renderFindings(findings);updateStats(read,findings);window.dispatchEvent(new CustomEvent("ida:report-ready",{detail:{kind:"github",report:summary}}));
   $("analysisTitle").textContent="Diagnostic réel — "+owner+"/"+repo;
   $("analysisSubtitle").textContent=read+" fichiers inspectés · branche "+branch+" · "+findings.length+" observations";
