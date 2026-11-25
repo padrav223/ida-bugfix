@@ -8,7 +8,7 @@ IDA BugFix propose trois entrées de diagnostic : dépôts GitHub publics, archi
 - Les requêtes OSV transmettent uniquement les noms, écosystèmes et versions des dépendances ; le code source n'est pas envoyé à OSV.
 - Analyse ZIP locale dans le navigateur avec précontrôle des tailles décompressées, plafond global, limite par fichier et détection de ratios de compression anormaux.
 - Audit web Lighthouse via PageSpeed Insights.
-- Historique local des 20 derniers rapports, filtres, export JSON et impression PDF.
+- Historique local des 20 derniers rapports, filtres, export JSON, rapports imprimables et export standard SARIF 2.1.0 pour les constats GitHub et ZIP.
 - Plan de correction priorisé à partir des alertes : recommandations et étapes de vérification, sans modification automatique du code.
 
 ## Fondations SaaS ajoutées en 2.2.0
