@@ -3,7 +3,8 @@ let lastReport = null;
 // Scanner revision: prioritise environment files and package metadata before the general file cap.
 const MAX_FILES = 60, MAX_FILE_BYTES = 150000;
 const SECRET_FILE = /^\.env(?:\.(?!example$|sample$|template$)[a-z0-9_-]+)?$/i;
-const TEXT_EXT = /\.(?:js|jsx|ts|tsx|mjs|cjs|json|html|css|scss|md|yml|yaml|toml|py|php|java|go|rs|sql|sh)$/i;
+const LOCK_FILE = /(?:^|\/)(?:package-lock\.json|npm-shrinkwrap\.json|requirements(?:-[a-z0-9_.-]+)?\.txt|go\.mod|cargo\.lock|composer\.lock)$/i;
+const TEXT_EXT = /\.(?:js|jsx|ts|tsx|mjs|cjs|json|html|css|scss|md|yml|yaml|toml|py|php|java|go|rs|sql|sh|txt|mod|lock)$/i;
 function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function parseRepoUrl(value){
   let u; try{u=new URL(value)}catch{throw Error("Adresse invalide. Collez une URL GitHub complète.");}
@@ -22,11 +23,10 @@ function finding(level,title,file,line,description,fix){
 }
 function inspectFile(path,content,findings){
   const lines=content.split(/\r?\n/), ext=path.split(".").pop().toLowerCase();
+  if(window.IDASecurityEngine)findings.push(...window.IDASecurityEngine.scanSecrets(path,content));
   const add=(l,t,d,f)=>findings.push(finding(l,t,path,t?lines.indexOf(t)+1:0,d,f));
   if(ext==="json"){try{JSON.parse(content)}catch(e){findings.push(finding("high","JSON invalide",path,0,"Le fichier ne peut pas être analysé comme JSON : "+e.message,"Corriger la syntaxe JSON puis relancer l'analyse."));}}
   lines.forEach((line,i)=>{
-    if(/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(line)||/(?:api[_-]?key|secret|token|password)\s*[:=]\s*["'][A-Za-z0-9_\-\/+=]{16,}["']/i.test(line))
-      findings.push(finding("critical","Possible secret exposé",path,i+1,"Une chaîne ressemblant à une clé ou un secret est présente. Sa valeur n'est pas affichée.","Révoquer la clé si elle est réelle, puis la déplacer vers des variables d'environnement."));
     if(/\beval\s*\(/.test(line)) findings.push(finding("high","Utilisation de eval()",path,i+1,"eval() exécute du texte comme du code et peut créer une faille si l'entrée n'est pas maîtrisée.","Éviter eval() et utiliser une logique explicite ou un parseur sûr."));
     if(/innerHTML\s*=/.test(line)) findings.push(finding("medium","Affectation directe à innerHTML",path,i+1,"Si la valeur contient des données non fiables, cela peut permettre une injection HTML ou JavaScript.","Préférer textContent ou assainir strictement le HTML avant insertion."));
     if(/\bconsole\.(?:log|debug)\s*\(/.test(line)&&!/(?:test|spec)\./i.test(path)) findings.push(finding("low","Trace console présente",path,i+1,"Un appel console peut laisser des informations de débogage en production.","Retirer ou contrôler cette trace avant la mise en production."));
@@ -63,25 +63,27 @@ async function runScan(url){
   const branch=repoInfo.default_branch;
   const tree=await githubJSON(base+"/git/trees/"+encodeURIComponent(branch)+"?recursive=1");
   if(tree.truncated)throw Error("Le dépôt est trop volumineux pour une analyse complète via cette version. Analyse interrompue pour éviter un résultat trompeur.");
-  const candidates=(tree.tree||[]).filter(x=>x.type==="blob"&&(TEXT_EXT.test(x.path)||SECRET_FILE.test(x.path.split("/").pop()))&&x.size<=MAX_FILE_BYTES&&!/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git)(?:\/|$)/.test(x.path));
-  candidates.sort((a,b)=>{const rank=x=>SECRET_FILE.test(x.path.split("/").pop())?0:x.path==="package.json"?1:2;return rank(a)-rank(b)||a.path.localeCompare(b.path);});
-  const selected=candidates.slice(0,MAX_FILES), findings=[];
+  const candidates=(tree.tree||[]).filter(x=>x.type==="blob"&&(TEXT_EXT.test(x.path)||SECRET_FILE.test(x.path.split("/").pop())||LOCK_FILE.test(x.path))&&x.size<=MAX_FILE_BYTES&&!/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git)(?:\/|$)/.test(x.path));
+  candidates.sort((a,b)=>{const rank=x=>SECRET_FILE.test(x.path.split("/").pop())?0:(x.path==="package.json"||LOCK_FILE.test(x.path))?1:2;return rank(a)-rank(b)||a.path.localeCompare(b.path);});
+  const selected=candidates.slice(0,MAX_FILES), findings=[], sourceFiles=[];
   let read=0, skipped=Math.max(0,candidates.length-selected.length);
   for(const item of selected){
     try{
       const raw="https://raw.githubusercontent.com/"+encodeURIComponent(owner)+"/"+encodeURIComponent(repo)+"/"+encodeURIComponent(branch)+"/"+item.path.split("/").map(encodeURIComponent).join("/");
       const r=await fetch(raw);if(!r.ok)continue;
-      const content=await r.text();read++;inspectFile(item.path,content,findings);
+      const content=await r.text();read++;sourceFiles.push({path:item.path,content});inspectFile(item.path,content,findings);
       $("analysisSubtitle").textContent="Inspection : "+read+"/"+selected.length+" fichiers";
     }catch(e){/* un fichier inaccessible n'interrompt pas les autres */}
   }
   const packageItem=selected.find(x=>x.path==="package.json");
   let scripts=[];
   if(packageItem){try{const r=await fetch("https://raw.githubusercontent.com/"+owner+"/"+repo+"/"+branch+"/package.json");const pkg=await r.json();scripts=Object.keys(pkg.scripts||{});}catch{}}
+  let dependencyAudit={findings:[],packages:0,status:"Moteur OSV indisponible."};
+  if(window.IDASecurityEngine){dependencyAudit=await window.IDASecurityEngine.auditDependencies(sourceFiles);findings.push(...dependencyAudit.findings);if(dependencyAudit.packages&&!dependencyAudit.findings.length&&dependencyAudit.status.includes("terminée"))findings.push(finding("info","Aucune vulnérabilité OSV trouvée","Dépendances",0,dependencyAudit.packages+" dépendances épinglées vérifiées dans OSV.dev. Ce résultat ne couvre pas les dépendances non reconnues.","Vérifier aussi les dépendances transitives et maintenir les fichiers de verrouillage à jour."));if(dependencyAudit.packages&&dependencyAudit.status&&!dependencyAudit.status.includes("terminée"))findings.push(finding("info","Audit des dépendances incomplet","Dépendances",0,dependencyAudit.status,"Relancer avec une connexion stable ou vérifier les dépendances directement sur OSV.dev."));}
   if(!read)findings.push(finding("info","Aucun fichier texte analysable","—",0,"Aucun fichier compatible n'a pu être récupéré dans les limites définies.","Vérifier la visibilité du dépôt et les types de fichiers."));
   if(!findings.length)findings.push(finding("info","Aucun problème détecté par les règles activées","—",0,"L'analyse statique limitée n'a pas trouvé les motifs recherchés. Cela ne garantit pas l'absence de bugs.","Exécuter les tests du projet et faire une revue humaine."));
   const counts={critical:0,high:0,medium:0,low:0,info:0};findings.forEach(f=>counts[f.level]=(counts[f.level]||0)+1);
-  const summary={repository:owner+"/"+repo,branch,filesRead:read,filesConsidered:selected.length,filesSkipped:skipped,counts,findings,generatedAt:new Date().toISOString(),scripts};
+  const summary={version:"2.3.0",repository:owner+"/"+repo,branch,filesRead:read,filesConsidered:selected.length,filesSkipped:skipped,counts,findings,engines:{static:"IDA rules",secrets:"IDA Secret Rules",dependencies:"OSV.dev",dependencyPackages:dependencyAudit.packages,dependencyStatus:dependencyAudit.status},generatedAt:new Date().toISOString(),scripts};
   lastReport=summary;renderFindings(findings);updateStats(read,findings);window.dispatchEvent(new CustomEvent("ida:report-ready",{detail:{kind:"github",report:summary}}));
   $("analysisTitle").textContent="Diagnostic réel — "+owner+"/"+repo;
   $("analysisSubtitle").textContent=read+" fichiers inspectés · branche "+branch+" · "+findings.length+" observations";
