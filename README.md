@@ -1,24 +1,24 @@
 # IDA BugFix
 
-Prototype indépendant d'un assistant de diagnostic et de correction de bugs, en français et adapté au mobile.
+Outil web indépendant de diagnostic statique de dépôts GitHub publics, en français et adapté au mobile.
 
-## État actuel
+## Fonctionnement actuel
 
-La première version est une maquette d'interface avec diagnostics fictifs. Elle ne télécharge pas encore de dépôt, n'exécute pas de code distant, n'appelle pas de modèle IA et ne modifie aucun projet.
+- Récupère les métadonnées et l'arborescence d'un dépôt public via l'API GitHub.
+- Inspecte jusqu'à 60 fichiers texte de 150 Ko maximum.
+- Recherche certains motifs : secrets potentiellement exposés, eval(), innerHTML, traces console, TODO/FIXME et URL localhost.
+- Vérifie la syntaxe des fichiers JSON.
+- Exporte un rapport JSON.
+- N'exécute aucun code du dépôt et ne modifie aucun fichier distant.
 
-## Feuille de route
+## Limites importantes
 
-1. Récupération contrôlée des fichiers d'un dépôt GitHub.
-2. Analyse statique : secrets exposés, configuration, lint et types.
-3. Exécution des tests dans un environnement isolé, sans accès réseau et avec limites de ressources.
-4. Aide IA côté serveur, sans exposer les clés dans le navigateur.
-5. Correctifs proposés en diff sur une branche dédiée.
-6. Validation humaine obligatoire avant toute application.
+C'est une première analyse statique heuristique, pas un moteur IA ni un remplacement de tests, ESLint, TypeScript ou d'une revue humaine. Les résultats peuvent contenir des faux positifs et ne garantissent pas l'absence de bugs. Les dépôts privés, les gros dépôts et les analyses complètes ne sont pas pris en charge.
 
 ## Sécurité
 
-Tout dépôt analysé est non fiable. Aucun code utilisateur ne doit être exécuté sur le serveur principal. Ne jamais demander de mot de passe ou de token dans l'interface. Ne jamais modifier automatiquement la branche principale.
+Le code du dépôt est traité comme une donnée non fiable. Aucun token, mot de passe ou clé API n'est demandé. L'analyse s'effectue depuis le navigateur et n'exécute pas le code inspecté.
 
 ## Lancement
 
-Ouvrir `index.html` dans un navigateur. Aucun outil ou téléchargement n'est nécessaire pour cette maquette.
+Ouvrir `index.html` ou publier le dépôt avec GitHub Pages.
