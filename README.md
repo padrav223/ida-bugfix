@@ -1,34 +1,37 @@
-# IDA BugFix 2.1.0
+# IDA BugFix 2.2.0 — plateforme de diagnostic et fondations SaaS
 
-Plateforme web de diagnostic : dépôts GitHub publics, projets ZIP locaux et audits web via Google PageSpeed Insights / Lighthouse.
+IDA BugFix propose trois entrées de diagnostic : dépôts GitHub publics, archives ZIP locales et audits de sites via Google PageSpeed Insights / Lighthouse.
 
-## Nouveautés 2.1.0 — Analyse de projets ZIP
-- Import d’une archive ZIP depuis mobile ou ordinateur.
-- Analyse directement dans le navigateur : les fichiers ne sont pas téléversés.
-- Inspection statique de JavaScript, TypeScript, JSON, HTML, CSS, Python, PHP, Java, Go, Rust, SQL, YAML, TOML, Markdown, XML, Vue et Svelte.
-- Détection heuristique de secrets potentiels, eval(), innerHTML, traces console, TODO/FIXME, URLs localhost, JSON invalide et gestion fetch à vérifier.
-- Rapport JSON exportable avec gravité, emplacement, résumé et recommandations.
-- Limites : ZIP 30 Mo, 300 fichiers candidats, 1 Mo par fichier, 25 Mo de texte traité.
-- Exclusion des dossiers de dépendances et de compilation courants.
+## Fonctions disponibles dans l'application
+- Analyse statique heuristique GitHub (jusqu'à 60 fichiers texte).
+- Analyse ZIP locale dans le navigateur (limites indiquées dans l'interface).
+- Audit web Lighthouse via PageSpeed Insights.
+- Historique local des 20 derniers rapports, filtres, export JSON et impression PDF.
+- Plan de correction priorisé à partir des alertes : recommandations et étapes de vérification, sans modification automatique du code.
 
-## Modes existants
-### GitHub public
-- Inspection limitée à 60 fichiers texte de 150 Ko maximum.
-- Aucun code distant exécuté et aucun fichier distant modifié.
-### Audit web
-- Google PageSpeed Insights / Lighthouse : performances, accessibilité, bonnes pratiques et SEO.
-- Le site doit être public. Une clé API Google peut être nécessaire selon les quotas.
-- L’URL du site est transmise à Google PageSpeed Insights.
+## Fondations SaaS ajoutées en 2.2.0
+- Interface de création de compte et de connexion par e-mail avec Supabase Auth.
+- Synchronisation des rapports vers une base Supabase après configuration et authentification.
+- Tableau de bord client avec identité, formule et nombre de rapports synchronisés.
+- Schéma SQL pour profils, rapports et licences, avec Row Level Security et politiques d'accès par propriétaire.
+- Structure d'offres Free, Pro et Team et statut de licence administrable côté serveur.
+- Zone explicative réservée à l'exécution isolée des tests.
 
-## Limites et sécurité
-La version 2.1.0 est un outil de diagnostic statique. Elle ne comprend pas toutes les erreurs possibles, ne modifie pas le code, n’exécute pas les tests et ne garantit pas l’absence de bugs. Les alertes sont des pistes à vérifier. Le mode ZIP utilise JSZip chargé depuis jsDelivr ; une connexion est nécessaire pour charger cette bibliothèque. Les fichiers de l’archive restent dans le navigateur pendant l’analyse.
+## Activation cloud
+1. Créer un projet Supabase dédié à IDA BugFix (ne pas réutiliser les identifiants d'un autre projet).
+2. Exécuter `supabase/schema.sql` dans l'éditeur SQL du nouveau projet.
+3. Dans IDA BugFix, renseigner l'URL du projet et sa clé publique (publishable ou anon).
+4. Créer un compte puis se connecter. Les nouveaux rapports seront synchronisés après connexion.
+5. Pour attribuer une formule Pro/Team, l'administrateur doit mettre à jour la licence depuis un environnement serveur protégé.
 
-## Utilisation
-Ouvrir l’application, choisir GitHub, Projet ZIP ou Audit web, puis lancer l’analyse.
-## Nouveautés 2.1.0 — Espace Pro
-- Historique local des 20 derniers diagnostics GitHub, ZIP et audits web.
-- Recherche textuelle et filtres par niveau de gravité dans les résultats.
-- Rapport professionnel imprimable depuis le navigateur (option « Enregistrer en PDF »).
-- Export JSON individuel et export de l'historique.
-- L'historique est stocké uniquement dans le navigateur de l'utilisateur et ne se synchronise pas entre appareils.
-- Aucun compte, serveur, paiement ou synchronisation cloud n'est inclus dans cette version.
+La configuration Supabase saisie dans le navigateur est conservée localement. Ne jamais utiliser une clé `service_role` ou une clé secrète dans le navigateur.
+
+## Ce qui n'est pas encore activé
+- Aucun projet Supabase n'est préconfiguré et aucun compte cloud n'est créé automatiquement.
+- Aucun prestataire de paiement (Stripe, PayDunya, etc.) ni webhook de paiement n'est raccordé : les offres affichées ne déclenchent aucun prélèvement.
+- Aucun moteur n'exécute le code client. L'exécution de code non fiable exige un service sandbox isolé, avec quotas, réseau restreint, limites de ressources et suppression des environnements.
+- Les corrections sont des recommandations, pas des patchs automatiques ni des garanties de résolution.
+- Les rôles d'administration et l'attribution des licences doivent être effectués côté serveur avec des claims fiables, jamais depuis les métadonnées modifiables du profil utilisateur.
+
+## Sécurité et limites d'analyse
+L'analyse statique ne prouve ni l'existence ni l'absence d'une vulnérabilité. Aucun code distant n'est exécuté et aucun fichier n'est modifié. Les alertes sont des pistes à vérifier. Le mode ZIP traite les fichiers dans le navigateur, avec JSZip chargé depuis jsDelivr. L'URL d'un site audité est transmise à Google PageSpeed Insights.
