@@ -1,5 +1,6 @@
 const $ = (id) => document.getElementById(id);
 let lastReport = null;
+// Scanner revision: prioritise environment files and package metadata before the general file cap.
 const MAX_FILES = 60, MAX_FILE_BYTES = 150000;
 const SECRET_FILE = /^\.env(?:\.(?!example$|sample$|template$)[a-z0-9_-]+)?$/i;
 const TEXT_EXT = /\.(?:js|jsx|ts|tsx|mjs|cjs|json|html|css|scss|md|yml|yaml|toml|py|php|java|go|rs|sql|sh)$/i;
