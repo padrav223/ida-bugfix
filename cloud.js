@@ -17,13 +17,14 @@
  }
  async function activate(u){
   user=u;$("cloudUser").textContent=u.email||"Compte IDA";say("Connecté : "+(u.email||"compte actif"));
-  await client.from("ida_profiles").upsert({user_id:u.id,display_name:u.email||null},{onConflict:"user_id"});
+  const {data:existingProfile}=await client.from("ida_profiles").select("user_id").eq("user_id",u.id).maybeSingle();
+  if(!existingProfile)await client.from("ida_profiles").insert({user_id:u.id,display_name:u.email||null});
   const [{data:profile},{data:licenses},{data:reports}] = await Promise.all([
-   client.from("ida_profiles").select("plan").eq("user_id",u.id).maybeSingle(),
+   client.from("ida_profiles").select("user_id").eq("user_id",u.id).maybeSingle(),
    client.from("ida_licenses").select("plan,status,ends_at").eq("user_id",u.id).eq("status","active").order("created_at",{ascending:false}).limit(1),
    client.from("ida_reports").select("id",{count:"exact",head:true}).eq("user_id",u.id)
   ]);
-  const license=licenses?.[0];$("cloudPlan").textContent="Offre : "+(license?.plan||profile?.plan||"free").toUpperCase()+(license?.ends_at?" · jusqu'au "+new Date(license.ends_at).toLocaleDateString("fr-FR"):"");
+  const license=licenses?.[0];$("cloudPlan").textContent="Offre : "+(license?.plan||"free").toUpperCase()+(license?.ends_at?" · jusqu'au "+new Date(license.ends_at).toLocaleDateString("fr-FR"):"");
   $("cloudReportCount").textContent=String(reports?.length??0);
   await syncLocal();
  }
