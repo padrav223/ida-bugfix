@@ -71,3 +71,11 @@ test("analyse aussi les fichiers requirements de développement", async () => {
   assert.equal(sentBody.queries.length, 2);
   assert.equal(sentBody.queries[0].package.ecosystem, "PyPI");
 });
+
+test("détecte aussi les secrets non entourés de guillemets dans les fichiers .env", () => {
+  const engine = loadEngine();
+  const findings = engine.scanSecrets(".env", "API_KEY=sk_live_fake_value_123456789\n");
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].ruleId, "secret-assignment");
+  assert.ok(!JSON.stringify(findings).includes("sk_live_fake_value_123456789"));
+});

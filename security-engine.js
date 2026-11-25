@@ -10,7 +10,7 @@
     {id:"secret.google-api-key",level:"high",re:/\bAIza[0-9A-Za-z_-]{30,}\b/,why:"Clé API Google à format reconnaissable détectée."},
     {id:"secret.stripe-live",level:"critical",re:/\bsk_live_[0-9A-Za-z]{20,}\b/,why:"Clé secrète Stripe live détectée."},
     {id:"secret.jwt",level:"high",re:/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/,why:"Chaîne au format JWT détectée."},
-    {id:"secret-assignment",level:"high",re:/\b(?:api[_-]?key|client[_-]?secret|access[_-]?token|auth[_-]?token|password|passwd|secret)\b\s*[:=]\s*["'][^"'\s]{12,}["']/i,why:"Affectation contenant une valeur qui ressemble à un secret."}
+    {id:"secret-assignment",level:"high",re:/\b(?:api[_-]?key|client[_-]?secret|access[_-]?token|auth[_-]?token|password|passwd|secret)\b\s*[:=]\s*(?:"([^"\s]{12,})"|'([^'\s]{12,})'|([A-Za-z0-9_./+=-]{16,}))/i,why:"Affectation contenant une valeur qui ressemble à un secret."}
   ];
   const PLACEHOLDERS=/^(?:your[_ -]?.*|replace[_ -]?.*|changeme|example|dummy|test|xxx+|<.*>|\$\{.*\}|process\.env\..*)$/i;
   function secretFindings(path,content){
@@ -19,7 +19,7 @@
       for(const rule of SECRET_RULES){
         const m=line.match(rule.re);if(!m)continue;
         if(rule.id==="secret-assignment"){
-          const value=(m[0].match(/["']([^"']+)["']\s*$/)||[])[1]||"";
+          const value=m[1]||m[2]||m[3]||"";
           if(PLACEHOLDERS.test(value))continue;
         }
         out.push({level:rule.level,title:"Secret potentiellement exposé",file:path,line:i+1,ruleId:rule.id,confidence:rule.id==="secret-assignment"?"medium":"high",source:"IDA Secret Rules",description:rule.why+" La valeur n'est jamais reproduite dans le rapport.",fix:"Révoquer immédiatement la valeur si elle est réelle, vérifier les journaux et l'historique Git, puis utiliser une variable d'environnement ou un gestionnaire de secrets."});
@@ -72,7 +72,8 @@
     for(let i=0;i<packages.length;i+=100){
       const batch=packages.slice(i,i+100);
       try{
-        const response=await fetch("https://api.osv.dev/v1/querybatch",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({queries:batch.map(p=>({package:{name:p.name,ecosystem:p.ecosystem},version:p.version}))})});
+        const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
+        let response;try{response=await fetch("https://api.osv.dev/v1/querybatch",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({queries:batch.map(p=>({package:{name:p.name,ecosystem:p.ecosystem},version:p.version}))}),signal:controller.signal});}finally{clearTimeout(timeout);}
         if(!response.ok)throw new Error("OSV HTTP "+response.status);
         const data=await response.json(),results=data.results||[];
         results.forEach((r,index)=>{
