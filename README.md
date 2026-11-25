@@ -5,8 +5,8 @@ Outil web indépendant de diagnostic statique de dépôts GitHub publics, en fra
 ## Fonctionnement actuel
 
 - Récupère les métadonnées et l'arborescence d'un dépôt public via l'API GitHub.
-- Inspecte jusqu'à 60 fichiers texte de 150 Ko maximum.
-- Recherche certains motifs : secrets potentiellement exposés, eval(), innerHTML, traces console, TODO/FIXME et URL localhost.
+- Inspecte jusqu'à 60 fichiers texte de 150 Ko maximum, en donnant la priorité aux fichiers `.env` (hors modèles d'exemple) et à `package.json`.
+- Recherche certains motifs : secrets potentiellement exposés, `eval()`, `innerHTML`, traces console, TODO/FIXME et URL localhost.
 - Vérifie la syntaxe des fichiers JSON.
 - Exporte un rapport JSON.
 - N'exécute aucun code du dépôt et ne modifie aucun fichier distant.
