@@ -80,7 +80,7 @@
             const ids=[v.id,...(v.aliases||[])].filter(Boolean).slice(0,4);
             const severityText=(v.database_specific?.severity||"").toUpperCase();
             const cvss=Number(v.severity?.find(x=>x.type==="CVSS_V3")?.score);
-            const level=/CRITICAL/.test(severityText)||cvss>=9?"critical":/HIGH/.test(severityText)||cvss>=7?"high":/MODERATE|MEDIUM/.test(severityText)||cvss>=4?"medium":"low";
+            const level=/CRITICAL/.test(severityText)||cvss>=9?"critical":/HIGH/.test(severityText)||cvss>=7?"high":/MODERATE|MEDIUM/.test(severityText)||cvss>=4?"medium":severityText?"low":"medium";
             findings.push({level,title:"Dépendance vulnérable : "+pkg.name+"@"+pkg.version,file:pkg.file,line:0,ruleId:"OSV:"+v.id,confidence:"high",source:"OSV.dev",description:(v.summary||v.details||"Une vulnérabilité connue correspond à cette version.")+" Références : "+ids.join(", "),fix:"Mettre à jour vers une version corrigée indiquée par OSV.dev, vérifier les changements incompatibles puis relancer les tests."});
           });
         });
