@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#101812" />
-  <meta name="description" content="IDA BugFix — analyse statique de dépôts GitHub publics." />
+  <meta name="description" content="IDA BugFix — diagnostic GitHub et audit de sites web." />
   <title>IDA BugFix — Analyse intelligente de code</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -30,6 +30,14 @@
         <div class="demo-callout"><div><b>Vous voulez simplement voir le fonctionnement ?</b><p>L'analyse utilise des règles statiques dans votre navigateur. Aucun code distant n'est exécuté.</p></div><button class="button secondary" id="demoBtn" type="button">À propos</button></div>
       </section>
       <section class="panel hidden" id="analysisPanel"><div class="section-heading"><div><div class="eyebrow">RÉSULTAT DE L'ANALYSE</div><h2 id="analysisTitle">Diagnostic</h2><p id="analysisSubtitle"></p></div><span class="demo-label">ANALYSE STATIQUE</span></div><div class="notice"><b>Analyse statique :</b> les résultats sont des alertes heuristiques à vérifier. Aucun code du dépôt n’est exécuté et aucun fichier n’est modifié.</div><div class="findings-list" id="findingsList"></div><div class="panel-footer"><button class="button secondary" id="resetBtn">Nouvelle analyse</button><button class="button primary" id="reportBtn">Exporter le rapport ↓</button></div></section>
+      <section class="panel site-panel" id="site-scan">
+        <div class="section-heading"><div><div class="eyebrow">AUDIT DE SITE WEB</div><h2>Analyser un site en ligne</h2><p>Évaluez les performances, le SEO, l’accessibilité et les bonnes pratiques avec Google Lighthouse.</p></div><span class="step-badge">ÉTAPE 02</span></div>
+        <form id="siteForm" class="scan-form"><label for="siteUrl">Adresse du site web</label><div class="input-row"><span class="input-prefix">◎</span><input id="siteUrl" type="url" placeholder="https://www.monsite.com" required/><button class="button primary" type="submit">Auditer →</button></div>
+        <div class="site-options"><label for="siteStrategy">Appareil</label><select id="siteStrategy"><option value="mobile">Mobile (recommandé)</option><option value="desktop">Ordinateur</option></select></div>
+        <details class="api-key-details"><summary>Clé API Google (facultative, si demandée)</summary><input id="psiKey" type="password" placeholder="Clé API PageSpeed Insights" autocomplete="off"/><small>La clé reste dans cette page et n’est pas enregistrée.</small></details>
+        <div class="form-note">Le site doit être public. Aucun fichier ni réglage du site n’est modifié.</div><div class="form-error" id="siteError" role="alert"></div></form>
+      </section>
+      <section class="panel hidden" id="siteResults"><div class="section-heading"><div><div class="eyebrow">RÉSULTATS DU SITE</div><h2 id="siteResultTitle">Audit web</h2><p id="siteResultSubtitle"></p></div><span class="step-badge">LIGHTHOUSE</span></div><div class="site-scores" id="siteScores"></div><div class="notice">Résultats Google Lighthouse : ils peuvent varier selon le réseau, l’appareil et le moment du test.</div><div id="siteAuditList" class="findings-list"></div><div class="panel-footer"><button class="button secondary" id="siteResetBtn" type="button">Nouvel audit</button><button class="button primary" id="siteReportBtn" type="button">Exporter le rapport ↓</button></div></section>
       <section class="how-section" id="how"><div class="eyebrow">SÉCURITÉ ET TRANSPARENCE</div><h2>Vous décidez. Toujours.</h2><div class="how-grid"><article><span>01</span><h3>Inspecter</h3><p>L’analyseur lit les fichiers texte sélectionnés et applique des règles statiques.</p></article><article><span>02</span><h3>Comprendre</h3><p>Chaque problème est expliqué avec sa gravité et son origine.</p></article><article><span>03</span><h3>Décider</h3><p>Aucune correction automatique : vous gardez le contrôle des modifications.</p></article><article><span>04</span><h3>Vérifier</h3><p>Lancez les tests du projet après chaque correction.</p></article></div></section>
       <footer><span>© 2026 IDA BugFix</span><span>Un projet Impact Digital Academy</span><a href="#home">Retour en haut ↑</a></footer>
     </main>
