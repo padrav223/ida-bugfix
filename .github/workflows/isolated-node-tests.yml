@@ -29,8 +29,8 @@ jobs:
       - name: Valider les paramètres
         shell: bash
         env:
-          REPOSITORY: \${{ inputs.repository }}
-          REF_NAME: \${{ inputs.ref }}
+          REPOSITORY: ${{ inputs.repository }}
+          REF_NAME: ${{ inputs.ref }}
         run: |
           set -euo pipefail
           if [[ ! "$REPOSITORY" =~ ^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$ ]]; then
@@ -45,8 +45,8 @@ jobs:
       - name: Télécharger le dépôt public
         shell: bash
         env:
-          REPOSITORY: \${{ inputs.repository }}
-          REF_NAME: \${{ inputs.ref }}
+          REPOSITORY: ${{ inputs.repository }}
+          REF_NAME: ${{ inputs.ref }}
         run: |
           set -euo pipefail
           git clone --depth 1 --branch "$REF_NAME" -- "$REPOSITORY" target
@@ -64,8 +64,9 @@ jobs:
           set -euo pipefail
           node <<'NODE'
           const fs = require("node:fs");
-          if (fs.statSync("target/package-lock.json").size > 10 * 1024 * 1024) throw new Error("package-lock.json dépasse 10 Mo");
-          const lock = JSON.parse(fs.readFileSync("target/package-lock.json", "utf8"));
+          const lockPath = fs.existsSync("target/package-lock.json") ? "target/package-lock.json" : "target/npm-shrinkwrap.json";
+          if (fs.statSync(lockPath).size > 10 * 1024 * 1024) throw new Error("Fichier lock dépasse 10 Mo");
+          const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
           if (Object.keys(lock.packages || {}).length > 2000) throw new Error("Plus de 2 000 entrées de dépendances : limite du runner");
           const urls = [];
           const walk = value => {
@@ -101,7 +102,7 @@ jobs:
       - name: Exécuter les tests sans réseau
         shell: bash
         env:
-          RUN_LINT: \${{ inputs.run_lint }}
+          RUN_LINT: ${{ inputs.run_lint }}
         run: |
           set -euo pipefail
           docker run --rm \
