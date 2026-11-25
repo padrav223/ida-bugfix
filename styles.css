@@ -140,3 +140,27 @@ footer a{color:#287844}
  .how-section{padding:22px 0 32px}
  footer{font-size:9px}
 }
+
+/* IDA BugFix Pro workspace */
+.pro-history-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0 12px;color:#617366;font-size:12px}
+.pro-history-head>div{display:flex;gap:7px;flex-wrap:wrap}
+.pro-history-list{display:grid;gap:9px}
+.pro-history-item{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 15px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)}
+.pro-history-item b{display:block;color:var(--text);font-size:13px;overflow-wrap:anywhere}
+.pro-history-item small,.pro-history-item span{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.pro-history-actions{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.button.quiet{background:transparent;color:var(--muted);border:1px solid var(--line);padding:8px 11px}
+.pro-filter-bar{display:flex;gap:9px;margin:14px 0;flex-wrap:wrap}
+.pro-filter-bar input,.pro-filter-bar select{min-width:0;flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--text);font:inherit;font-size:12px}
+.finding[hidden]{display:none!important}
+.pro-history-item .button{font-size:10px;padding:8px 10px}
+@media(max-width:650px){
+ .pro-history-item{align-items:flex-start;flex-direction:column}
+ .pro-history-actions{width:100%}
+ .pro-history-actions .button{flex:1;justify-content:center}
+ .pro-history-head{align-items:flex-start;flex-direction:column}
+ .pro-history-head>div{width:100%}
+ .pro-history-head .button{flex:1;justify-content:center}
+ .pro-filter-bar{flex-direction:column}
+ .pro-filter-bar input,.pro-filter-bar select{width:100%;flex:auto}
+}
