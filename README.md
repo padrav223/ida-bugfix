@@ -35,7 +35,8 @@ L'analyse ZIP vérifie les tailles décompressées déclarées par l'archive ava
 La configuration Supabase saisie dans le navigateur est conservée localement. Ne jamais utiliser une clé `service_role` ou une clé secrète dans le navigateur.
 
 ## Ce qui n'est pas encore activé
-- Aucun projet Supabase n'est préconfiguré et aucun compte cloud n'est créé automatiquement.
+- Le projet Supabase dédié IDA BugFix est préconfiguré dans l'application. Aucun compte cloud n'est créé automatiquement.
+- Vérifier dans Supabase que l'URL Site URL et l'URL de redirection autorisée correspondent à `https://padrav223.github.io/ida-bugfix/` avant le premier test d'inscription.
 - Aucun prestataire de paiement (Stripe, PayDunya, etc.) ni webhook de paiement n'est raccordé : les offres affichées ne déclenchent aucun prélèvement.
 - Aucun moteur n'exécute le code client. L'exécution de code non fiable exige un service sandbox isolé, avec quotas, réseau restreint, limites de ressources et suppression des environnements.
 - Les corrections sont des recommandations, pas des patchs automatiques ni des garanties de résolution.
