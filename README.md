@@ -1,10 +1,12 @@
-# IDA BugFix 2.2.0 — plateforme de diagnostic et fondations SaaS
+# IDA BugFix 2.3.0 — moteur de diagnostic renforcé
 
 IDA BugFix propose trois entrées de diagnostic : dépôts GitHub publics, archives ZIP locales et audits de sites via Google PageSpeed Insights / Lighthouse.
 
 ## Fonctions disponibles dans l'application
-- Analyse statique heuristique GitHub (jusqu'à 60 fichiers texte).
-- Analyse ZIP locale dans le navigateur (limites indiquées dans l'interface).
+- Analyse statique GitHub (jusqu'à 60 fichiers texte) et détection de secrets à motifs connus.
+- Audit de dépendances épinglées via OSV.dev : npm (`package-lock.json`), Python (`requirements*.txt`), Go (`go.mod`), Rust (`Cargo.lock`) et PHP (`composer.lock`).
+- Les requêtes OSV transmettent uniquement les noms, écosystèmes et versions des dépendances ; le code source n'est pas envoyé à OSV.
+- Analyse ZIP locale dans le navigateur avec précontrôle des tailles décompressées, plafond global, limite par fichier et détection de ratios de compression anormaux.
 - Audit web Lighthouse via PageSpeed Insights.
 - Historique local des 20 derniers rapports, filtres, export JSON et impression PDF.
 - Plan de correction priorisé à partir des alertes : recommandations et étapes de vérification, sans modification automatique du code.
@@ -16,6 +18,12 @@ IDA BugFix propose trois entrées de diagnostic : dépôts GitHub publics, archi
 - Schéma SQL pour profils, rapports et licences, avec Row Level Security et politiques d'accès par propriétaire.
 - Structure d'offres Free, Pro et Team et statut de licence administrable côté serveur.
 - Zone explicative réservée à l'exécution isolée des tests.
+
+## Moteur sécurité 2.3.0
+
+Les règles de secrets et les alertes de code restent des détections statiques : elles peuvent produire des faux positifs et ne prouvent pas qu'une faille est exploitable. L'audit OSV couvre uniquement les formats de verrouillage et versions reconnus ; il ne remplace pas un audit complet des dépendances. Si OSV.dev est inaccessible, le rapport signale que la vérification est incomplète au lieu de prétendre qu'aucune vulnérabilité n'existe.
+
+L'analyse ZIP vérifie les tailles décompressées déclarées par l'archive avant de lire les fichiers et refuse les entrées dépassant les limites configurées.
 
 ## Activation cloud
 1. Créer un projet Supabase dédié à IDA BugFix (ne pas réutiliser les identifiants d'un autre projet).
