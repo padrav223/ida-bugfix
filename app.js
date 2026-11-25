@@ -108,6 +108,7 @@ $("reportBtn").addEventListener("click",()=>{
   const blob=new Blob([JSON.stringify(lastReport,null,2)],{type:"application/json;charset=utf-8"}),a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download="ida-bugfix-rapport.json";a.click();URL.revokeObjectURL(a.href);
 });
+$("sarifReportBtn").addEventListener("click",()=>{if(!lastReport){$("formError").textContent="Aucun rapport réel à exporter.";return;}window.IDASarif?.download(lastReport,"github","ida-bugfix-github.sarif");});
 $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
 document.querySelectorAll(".nav-link").forEach(a=>a.addEventListener("click",()=>$("sidebar").classList.remove("open")));
 
