@@ -4,7 +4,8 @@ let lastReport = null;
 const MAX_FILES = 60, MAX_FILE_BYTES = 150000, MAX_LOCK_FILE_BYTES = 1500000;
 const SECRET_FILE = /^\.env(?:\.(?!example$|sample$|template$)[a-z0-9_-]+)?$/i;
 const LOCK_FILE = /(?:^|\/)(?:package-lock\.json|npm-shrinkwrap\.json|requirements(?:-[a-z0-9_.-]+)?\.txt|go\.mod|cargo\.lock|composer\.lock)$/i;
-const TEXT_EXT = /\.(?:js|jsx|ts|tsx|mjs|cjs|json|html|css|scss|md|yml|yaml|toml|py|php|java|go|rs|sql|sh|txt|mod|lock)$/i;
+const BUILD_WRAPPER = /(?:^|\/)(?:mvnw|gradlew)$/i;
+const TEXT_EXT = /\.(?:js|jsx|ts|tsx|mjs|cjs|json|html|css|scss|md|yml|yaml|toml|py|php|java|go|rs|sql|sh|txt|mod|lock|gradle|kts)$/i;
 function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function parseRepoUrl(value){
   let u; try{u=new URL(value)}catch{throw Error("Adresse invalide. Collez une URL GitHub complète.");}
@@ -64,7 +65,7 @@ async function runScan(url){
   const branch=repoInfo.default_branch;
   const tree=await githubJSON(base+"/git/trees/"+encodeURIComponent(branch)+"?recursive=1");
   if(tree.truncated)throw Error("Le dépôt est trop volumineux pour une analyse complète via cette version. Analyse interrompue pour éviter un résultat trompeur.");
-  const candidates=(tree.tree||[]).filter(x=>x.type==="blob"&&(TEXT_EXT.test(x.path)||SECRET_FILE.test(x.path.split("/").pop())||LOCK_FILE.test(x.path))&&(LOCK_FILE.test(x.path)?x.size<=MAX_LOCK_FILE_BYTES:x.size<=MAX_FILE_BYTES)&&!/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git)(?:\/|$)/.test(x.path));
+  const candidates=(tree.tree||[]).filter(x=>x.type==="blob"&&(TEXT_EXT.test(x.path)||SECRET_FILE.test(x.path.split("/").pop())||LOCK_FILE.test(x.path)||BUILD_WRAPPER.test(x.path))&&(LOCK_FILE.test(x.path)?x.size<=MAX_LOCK_FILE_BYTES:x.size<=MAX_FILE_BYTES)&&!/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git)(?:\/|$)/.test(x.path));
   candidates.sort((a,b)=>{const rank=x=>SECRET_FILE.test(x.path.split("/").pop())?0:(x.path==="package.json"||LOCK_FILE.test(x.path))?1:2;return rank(a)-rank(b)||a.path.localeCompare(b.path);});
   const selected=candidates.slice(0,MAX_FILES), findings=[], sourceFiles=[],astStats={filesParsed:0,filesSkipped:0,nodes:0};
   let read=0, skipped=Math.max(0,candidates.length-selected.length);
