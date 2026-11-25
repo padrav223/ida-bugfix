@@ -46,3 +46,4 @@ document.getElementById("zipForm").addEventListener("submit",async e=>{
 });
 document.getElementById("zipResetBtn").addEventListener("click",()=>{document.getElementById("zipResults").classList.add("hidden");document.getElementById("zipFile").value="";document.getElementById("zipFileName").textContent="Aucun fichier sélectionné";document.getElementById("zipError").textContent="";lastZipReport=null;});
 document.getElementById("zipReportBtn").addEventListener("click",()=>{if(!lastZipReport)return;const blob=new Blob([JSON.stringify(lastZipReport,null,2)],{type:"application/json;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ida-bugfix-2.3.0-rapport-zip.json";a.click();URL.revokeObjectURL(a.href);});
+document.getElementById("zipSarifReportBtn").addEventListener("click",()=>{if(!lastZipReport)return;window.IDASarif?.download(lastZipReport,"zip","ida-bugfix-zip.sarif");});
