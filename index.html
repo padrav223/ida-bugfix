@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#101812" />
   <meta name="description" content="IDA BugFix — diagnostic GitHub et audit de sites web." />
-  <title>IDA BugFix 2.3.0 Pro — Plateforme de diagnostic</title>
+  <title>IDA BugFix 2.4.0 Pro — Plateforme de diagnostic</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -25,7 +25,7 @@
       <div class="sidebar-bottom"><div class="secure-dot"></div><div><b>Deux modes d’analyse</b><small>GitHub + sites web</small></div></div>
     </aside>
     <main class="main-content" id="home">
-      <header class="topbar"><button class="menu-btn" id="menuBtn" aria-label="Ouvrir le menu">☰</button><div class="crumb">IDA / <b>BugFix</b> <span class="version-tag">v2.3.0 Pro</span></div><div class="top-actions"><span class="status-pill"><i></i> Système prêt</span><div class="avatar">ID</div></div></header>
+      <header class="topbar"><button class="menu-btn" id="menuBtn" aria-label="Ouvrir le menu">☰</button><div class="crumb">IDA / <b>BugFix</b> <span class="version-tag">v2.4.0 Pro</span></div><div class="top-actions"><span class="status-pill"><i></i> Système prêt</span><div class="avatar">ID</div></div></header>
       <section class="welcome"><div><div class="eyebrow">DIAGNOSTIC DE CODE ET DE SITES</div><h1>Les bugs ne devraient<br/><em>pas vous ralentir.</em></h1><p>Analysez un dépôt GitHub public, un projet ZIP local ou auditez un site web. Vos fichiers ZIP restent dans votre navigateur.</p><a class="button primary" href="#new-scan">＋ Lancer une analyse</a></div><div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="core"><span>BUG</span><b>FIX</b></div><div class="float-tag tag-top">✓ Analyse</div><div class="float-tag tag-bottom">{ } Code</div></div></section>
       <section class="stats-grid" aria-label="Statistiques"><article class="stat-card"><span class="stat-icon">⌕</span><div class="stat-value">—</div><div class="stat-label">Fichiers inspectés</div><small>Pendant la dernière analyse</small></article><article class="stat-card"><span class="stat-icon amber">⚑</span><div class="stat-value">—</div><div class="stat-label">Alertes à vérifier</div><small>Alertes statiques, pas forcément des bugs</small></article><article class="stat-card"><span class="stat-icon green">✓</span><div class="stat-value">—</div><div class="stat-label">Corrections appliquées</div><small>Aucune modification automatique</small></article></section>
       <section class="panel" id="new-scan"><div class="section-heading"><div><div class="eyebrow">COMMENCER</div><h2>Analyser un dépôt GitHub</h2><p>Collez l'adresse d'un dépôt public : IDA BugFix inspectera ses fichiers texte et signalera des risques détectables.</p></div><span class="step-badge">ÉTAPE 01</span></div>
@@ -65,12 +65,14 @@
       </section>
       <section class="panel pro-history" id="pro-history"><div class="section-heading"><div><div class="eyebrow">ESPACE PROFESSIONNEL</div><h2>Historique des diagnostics</h2><p>Retrouvez vos 20 dernières analyses sur cet appareil, réouvrez un rapport imprimable ou exportez les données JSON.</p></div><span class="step-badge">PRO</span></div><div class="pro-history-head"><span id="proHistoryCount">0 / 20 rapports</span><div><button class="button secondary" id="proPrintCurrent" type="button">Rapport PDF</button><button class="button secondary" id="proExportHistory" type="button">Exporter historique</button><button class="button quiet" id="proClearHistory" type="button">Effacer</button></div></div><p id="proHistoryEmpty" class="form-note">Vos analyses apparaîtront ici après le premier diagnostic.</p><div id="proHistoryList" class="pro-history-list"></div><p id="proStorageStatus" class="form-note">Historique conservé localement dans ce navigateur. Il ne se synchronise pas entre appareils.</p></section>
       <section class="how-section" id="how"><div class="eyebrow">SÉCURITÉ ET TRANSPARENCE</div><h2>Vous décidez. Toujours.</h2><div class="how-grid"><article><span>01</span><h3>Inspecter</h3><p>L’analyseur lit les fichiers texte sélectionnés et applique des règles statiques.</p></article><article><span>02</span><h3>Comprendre</h3><p>Chaque problème est expliqué avec sa gravité et son origine.</p></article><article><span>03</span><h3>Décider</h3><p>Aucune correction automatique : vous gardez le contrôle des modifications.</p></article><article><span>04</span><h3>Vérifier</h3><p>Lancez les tests du projet après chaque correction.</p></article></div></section>
-      <footer><span>© 2026 IDA BugFix · v2.3.0</span><span>Un projet Impact Digital Academy</span><a href="#home">Retour en haut ↑</a></footer>
+      <footer><span>© 2026 IDA BugFix · v2.4.0</span><span>Un projet Impact Digital Academy</span><a href="#home">Retour en haut ↑</a></footer>
     </main>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/acorn@8.15.0/dist/acorn.min.js" crossorigin="anonymous"></script>
   <script src="security-engine.js"></script>
+  <script src="ast-engine.js"></script>
   <script src="app.js"></script>
   <script src="zip-scan.js"></script>
   <script src="pro.js"></script>

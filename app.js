@@ -21,7 +21,8 @@ async function githubJSON(url){
 function finding(level,title,file,line,description,fix){
   return {level,title,file,line,description,fix};
 }
-function inspectFile(path,content,findings){
+function inspectFile(path,content,findings,astStats){
+  if(window.IDAASTEngine&&/\.(?:js|mjs|cjs)$/i.test(path)){const ast=window.IDAASTEngine.analyze(path,content);if(ast.parsed){astStats.filesParsed++;astStats.nodes+=ast.nodes||0;findings.push(...ast.findings);}else astStats.filesSkipped++;}
   const lines=content.split(/\r?\n/), ext=path.split(".").pop().toLowerCase();
   if(window.IDASecurityEngine)findings.push(...window.IDASecurityEngine.scanSecrets(path,content));
   const add=(l,t,d,f)=>findings.push(finding(l,t,path,t?lines.indexOf(t)+1:0,d,f));
@@ -65,13 +66,13 @@ async function runScan(url){
   if(tree.truncated)throw Error("Le dépôt est trop volumineux pour une analyse complète via cette version. Analyse interrompue pour éviter un résultat trompeur.");
   const candidates=(tree.tree||[]).filter(x=>x.type==="blob"&&(TEXT_EXT.test(x.path)||SECRET_FILE.test(x.path.split("/").pop())||LOCK_FILE.test(x.path))&&(LOCK_FILE.test(x.path)?x.size<=MAX_LOCK_FILE_BYTES:x.size<=MAX_FILE_BYTES)&&!/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git)(?:\/|$)/.test(x.path));
   candidates.sort((a,b)=>{const rank=x=>SECRET_FILE.test(x.path.split("/").pop())?0:(x.path==="package.json"||LOCK_FILE.test(x.path))?1:2;return rank(a)-rank(b)||a.path.localeCompare(b.path);});
-  const selected=candidates.slice(0,MAX_FILES), findings=[], sourceFiles=[];
+  const selected=candidates.slice(0,MAX_FILES), findings=[], sourceFiles=[],astStats={filesParsed:0,filesSkipped:0,nodes:0};
   let read=0, skipped=Math.max(0,candidates.length-selected.length);
   for(const item of selected){
     try{
       const raw="https://raw.githubusercontent.com/"+encodeURIComponent(owner)+"/"+encodeURIComponent(repo)+"/"+encodeURIComponent(branch)+"/"+item.path.split("/").map(encodeURIComponent).join("/");
       const r=await fetch(raw);if(!r.ok)continue;
-      const content=await r.text();read++;sourceFiles.push({path:item.path,content});inspectFile(item.path,content,findings);
+      const content=await r.text();read++;sourceFiles.push({path:item.path,content});inspectFile(item.path,content,findings,astStats);
       $("analysisSubtitle").textContent="Inspection : "+read+"/"+selected.length+" fichiers";
     }catch(e){/* un fichier inaccessible n'interrompt pas les autres */}
   }
@@ -83,7 +84,7 @@ async function runScan(url){
   if(!read)findings.push(finding("info","Aucun fichier texte analysable","—",0,"Aucun fichier compatible n'a pu être récupéré dans les limites définies.","Vérifier la visibilité du dépôt et les types de fichiers."));
   if(!findings.length)findings.push(finding("info","Aucun problème détecté par les règles activées","—",0,"L'analyse statique limitée n'a pas trouvé les motifs recherchés. Cela ne garantit pas l'absence de bugs.","Exécuter les tests du projet et faire une revue humaine."));
   const counts={critical:0,high:0,medium:0,low:0,info:0};findings.forEach(f=>counts[f.level]=(counts[f.level]||0)+1);
-  const summary={version:"2.3.0",repository:owner+"/"+repo,branch,filesRead:read,filesConsidered:selected.length,filesSkipped:skipped,counts,findings,engines:{static:"IDA rules",secrets:"IDA Secret Rules",dependencies:"OSV.dev",dependencyPackages:dependencyAudit.packages,dependencyStatus:dependencyAudit.status},generatedAt:new Date().toISOString(),scripts};
+  const summary={version:"2.4.0",repository:owner+"/"+repo,branch,filesRead:read,filesConsidered:selected.length,filesSkipped:skipped,counts,findings,engines:{static:"IDA rules",secrets:"IDA Secret Rules",ast:"Acorn AST",astFilesParsed:astStats.filesParsed,astFilesSkipped:astStats.filesSkipped,astNodes:astStats.nodes,dependencies:"OSV.dev",dependencyPackages:dependencyAudit.packages,dependencyStatus:dependencyAudit.status},generatedAt:new Date().toISOString(),scripts};
   lastReport=summary;renderFindings(findings);updateStats(read,findings);window.dispatchEvent(new CustomEvent("ida:report-ready",{detail:{kind:"github",report:summary}}));
   $("analysisTitle").textContent="Diagnostic réel — "+owner+"/"+repo;
   $("analysisSubtitle").textContent=read+" fichiers inspectés · branche "+branch+" · "+findings.length+" observations";
