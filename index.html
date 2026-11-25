@@ -16,8 +16,8 @@
       <nav>
         <a class="nav-link active" href="#home"><span>▦</span> Vue d'ensemble</a>
         <a class="nav-link" href="#new-scan"><span>⌕</span> Analyse GitHub</a>
-        <a class="nav-link" href="#site-scan"><span>◎</span> Analyse site web</a>
         <a class="nav-link" href="#zip-scan"><span>▤</span> Projet ZIP</a>
+        <a class="nav-link" href="#site-scan"><span>◎</span> Analyse site web</a>
         <a class="nav-link" href="#findings"><span>⚑</span> Diagnostics</a>
         <a class="nav-link" href="#how"><span>◇</span> Comment ça marche</a>
       </nav>
@@ -33,12 +33,12 @@
       </section>
       <section class="panel hidden" id="analysisPanel"><div class="section-heading"><div><div class="eyebrow">RÉSULTAT DE L'ANALYSE</div><h2 id="analysisTitle">Diagnostic</h2><p id="analysisSubtitle"></p></div><span class="demo-label">ANALYSE STATIQUE</span></div><div class="notice"><b>Analyse statique :</b> les résultats sont des alertes heuristiques à vérifier. Aucun code du dépôt n’est exécuté et aucun fichier n’est modifié.</div><div class="findings-list" id="findingsList"></div><div class="panel-footer"><button class="button secondary" id="resetBtn">Nouvelle analyse</button><button class="button primary" id="reportBtn">Exporter le rapport ↓</button></div></section>
       <section class="panel" id="zip-scan">
-        <div class="section-heading"><div><div class="eyebrow">ANALYSE LOCALE DE PROJET</div><h2>Importer un projet ZIP</h2><p>Analysez les fichiers de votre projet sans publier le code sur GitHub. Le ZIP est traité dans votre navigateur et n’est pas envoyé à nos serveurs.</p></div><span class="step-badge">ÉTAPE 03 · NOUVEAU</span></div>
+        <div class="section-heading"><div><div class="eyebrow">ANALYSE LOCALE DE PROJET</div><h2>Importer un projet ZIP</h2><p>Analysez les fichiers de votre projet sans publier le code sur GitHub. Le ZIP est traité dans votre navigateur et n’est pas envoyé à nos serveurs.</p></div><span class="step-badge">ÉTAPE 02 · NOUVEAU</span></div>
         <form id="zipForm" class="scan-form"><label for="zipFile">Archive du projet (.zip)</label><div class="zip-picker"><input id="zipFile" class="visually-hidden-file" type="file" accept=".zip,.ZIP,application/zip,application/x-zip-compressed,application/octet-stream" required/><button class="button secondary" id="chooseZipBtn" type="button">📁 Choisir un fichier ZIP</button><span id="zipFileName" class="zip-file-name" aria-live="polite">Aucun fichier sélectionné</span><button class="button primary" type="submit">Analyser le ZIP →</button></div><div class="form-note">Limites : 30 Mo par archive, 300 fichiers texte maximum, 1 Mo par fichier. Les dossiers de dépendances et de compilation sont ignorés.</div><div class="form-error" id="zipError" role="alert"></div></form>
         <div class="hidden" id="zipResults"><div class="notice" id="zipNotice">Analyse locale terminée.</div><div class="zip-summary" id="zipSummary"></div><div class="findings-list" id="zipFindings"></div><div class="panel-footer"><button class="button secondary" id="zipResetBtn" type="button">Nouvelle analyse</button><button class="button primary" id="zipReportBtn" type="button">Exporter le rapport ↓</button></div></div>
       </section>
       <section class="panel site-panel" id="site-scan">
-        <div class="section-heading"><div><div class="eyebrow">AUDIT DE SITE WEB</div><h2>Analyser un site en ligne</h2><p>Évaluez les performances, le SEO, l’accessibilité et les bonnes pratiques avec Google Lighthouse.</p></div><span class="step-badge">ÉTAPE 02</span></div>
+        <div class="section-heading"><div><div class="eyebrow">AUDIT DE SITE WEB</div><h2>Analyser un site en ligne</h2><p>Évaluez les performances, le SEO, l’accessibilité et les bonnes pratiques avec Google Lighthouse.</p></div><span class="step-badge">ÉTAPE 03</span></div>
         <form id="siteForm" class="scan-form"><label for="siteUrl">Adresse du site web</label><div class="input-row"><span class="input-prefix">◎</span><input id="siteUrl" type="url" placeholder="https://www.monsite.com" required/><button class="button primary" type="submit">Auditer →</button></div>
         <div class="site-options"><label for="siteStrategy">Appareil</label><select id="siteStrategy"><option value="mobile">Mobile (recommandé)</option><option value="desktop">Ordinateur</option></select></div>
         <details class="api-key-details"><summary>Clé API Google (facultative, si demandée)</summary><input id="psiKey" type="password" placeholder="Clé API PageSpeed Insights" autocomplete="off"/><small>La clé reste dans cette page et n’est pas enregistrée.</small></details>
