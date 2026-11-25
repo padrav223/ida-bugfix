@@ -1,0 +1,103 @@
+name: IDA BugFix isolated Node.js tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: "URL HTTPS d'un dépôt GitHub public"
+        required: true
+        type: string
+      ref:
+        description: "Branche, tag ou commit à tester"
+        required: true
+        default: "main"
+        type: string
+      run_lint:
+        description: "Lancer aussi npm run lint si le script existe"
+        required: false
+        default: false
+        type: boolean
+
+permissions: {}
+
+jobs:
+  isolated-node-tests:
+    name: Tests Node.js en conteneur isolé
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Valider les paramètres
+        shell: bash
+        env:
+          REPOSITORY: \${{ inputs.repository }}
+          REF_NAME: \${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$REPOSITORY" =~ ^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$ ]]; then
+            echo "::error::Seuls les dépôts GitHub publics au format HTTPS sont acceptés."
+            exit 2
+          fi
+          if [[ ! "$REF_NAME" =~ ^[A-Za-z0-9._/-]{1,100}$ ]] || [[ "$REF_NAME" == -* ]] || [[ "$REF_NAME" == *..* ]]; then
+            echo "::error::Nom de branche ou de tag invalide."
+            exit 2
+          fi
+
+      - name: Télécharger le dépôt public
+        shell: bash
+        env:
+          REPOSITORY: \${{ inputs.repository }}
+          REF_NAME: \${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch "$REF_NAME" -- "$REPOSITORY" target
+          test -f target/package.json || { echo "::error::Ce runner prend actuellement en charge les projets Node.js avec package.json."; exit 3; }
+
+      - name: Installer les dépendances sans scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f target/package-lock.json || -f target/npm-shrinkwrap.json ]]; then
+            npm ci --prefix target --ignore-scripts --no-audit --no-fund
+          else
+            npm install --prefix target --ignore-scripts --no-audit --no-fund
+          fi
+
+      - name: Précharger le runtime de test
+        run: docker pull node:22-alpine
+
+      - name: Exécuter les tests sans réseau
+        shell: bash
+        env:
+          RUN_LINT: \${{ inputs.run_lint }}
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            --network none \
+            --cpus=1 \
+            --memory=1536m \
+            --pids-limit=128 \
+            --security-opt=no-new-privileges:true \
+            --cap-drop=ALL \
+            --read-only \
+            --tmpfs /tmp:rw,nosuid,nodev,size=128m,uid=1000,gid=1000 \
+            --tmpfs /work:rw,nosuid,nodev,size=1024m,uid=1000,gid=1000 \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/target,dst=/input,readonly" \
+            --workdir /work \
+            --user 1000:1000 \
+            --env HOME=/tmp \
+            --env RUN_LINT="$RUN_LINT" \
+            node:22-alpine \
+            sh -euc '
+              cp -R /input/. /work/
+              node -e "if (!require(\"./package.json\").scripts?.test) { console.error(\"Aucun script test dans package.json\"); process.exit(3); }"
+              echo "=== npm test ==="
+              npm test
+              if [ "$RUN_LINT" = "true" ]; then
+                if node -e "process.exit(require(\"./package.json\").scripts?.lint ? 0 : 1)"; then
+                  echo "=== npm run lint ==="
+                  npm run lint
+                else
+                  echo "Aucun script lint : étape ignorée."
+                fi
+              fi
+            '
