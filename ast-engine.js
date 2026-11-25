@@ -64,10 +64,10 @@
     catch(first){try{ast=parser.parse(source,{ecmaVersion:"latest",sourceType:"script",locations:true,allowHashBang:true});}
       catch(second){return {findings:out,parsed:false,status:"Fichier ignoré par l'analyse AST : syntaxe non prise en charge ou erreur de syntaxe ("+(second.message||first.message)+")."};}}
     const vars=new Set(),seen=new Set();
-    const emit=(id,node,detail,confidence="high")=>{
+    const emit=(id,node,detail,confidence="high",suggestedChange=null)=>{
       const rule=RULES[id];if(!rule)return;
       const line=node?.loc?.start?.line||0,key=id+":"+line;if(seen.has(key))return;seen.add(key);
-      out.push({level:rule.level,title:rule.title,file:path,line,ruleId:id,confidence,source:"IDA AST Engine",description:detail,fix:rule.fix});
+      out.push({level:rule.level,title:rule.title,file:path,line,ruleId:id,confidence,source:"IDA AST Engine",description:detail,fix:rule.fix,...(suggestedChange?{suggestedChange:{...suggestedChange,requiresReview:true}}:{})});
     };
     const stack=[ast];let visited=0;
     while(stack.length){
@@ -92,10 +92,10 @@
           if(isFetch||obj?.name==="axios"||obj?.name==="http"||obj?.name==="https"||obj?.name==="got")emit("js.ssrf",node,"L'adresse ou la cible réseau dépend d'une donnée contrôlable par un utilisateur.", "medium");
         }
         if(name==="redirect"&&input)emit("js.open-redirect",node,"La destination de redirection dépend d'une entrée non fiable.", "medium");
-        if(name==="createHash"&&arg?.type==="Literal"&&["md5","sha1"].includes(String(arg.value).toLowerCase()))emit("js.weak-hash",node,"Un algorithme de hachage cryptographique obsolète est demandé : "+arg.value+".","high");
+        if(name==="createHash"&&arg?.type==="Literal"&&["md5","sha1"].includes(String(arg.value).toLowerCase())){const before=source.slice(node.start,node.end),after=before.replace("'md5'","'sha256'").replace("'sha1'","'sha256'").replace('"md5"','"sha256"').replace('"sha1"','"sha256"');emit("js.weak-hash",node,"Un algorithme de hachage cryptographique obsolète est demandé : "+arg.value+".","high",after!==before?{before,after,reason:"Proposition SHA-256; vérifier la compatibilité des empreintes et protocoles."}:null);}
       }
-      if(node.type==="AssignmentExpression"&&node.left?.type==="MemberExpression"&&["innerHTML","outerHTML"].includes(memberName(node.left))&&tainted(node.right,vars))emit("js.dom-xss",node,"Une valeur issue d'une entrée non fiable est affectée à "+memberName(node.left)+".","high");
-      if(node.type==="Property"&&node.key?.name==="rejectUnauthorized"&&node.value?.type==="Literal"&&node.value.value===false)emit("js.insecure-tls",node,"La validation du certificat TLS est explicitement désactivée.","high");
+      if(node.type==="AssignmentExpression"&&node.left?.type==="MemberExpression"&&["innerHTML","outerHTML"].includes(memberName(node.left))&&tainted(node.right,vars)){const before=source.slice(node.start,node.end),after=before.replace(".innerHTML =",".textContent =").replace(".outerHTML =",".textContent =");emit("js.dom-xss",node,"Une valeur issue d'une entrée non fiable est affectée à "+memberName(node.left)+".","high",after!==before?{before,after,reason:"Remplacement proposé de l'interprétation HTML par du texte brut."}:null);}
+      if(node.type==="Property"&&node.key?.name==="rejectUnauthorized"&&node.value?.type==="Literal"&&node.value.value===false){const before=source.slice(node.start,node.end),after=before.replace("false","true");emit("js.insecure-tls",node,"La validation du certificat TLS est explicitement désactivée.","high",after!==before?{before,after,reason:"Réactivation proposée de la validation TLS."}:null);}
       if(node.type==="CallExpression"&&node.callee?.type==="MemberExpression"&&node.callee.object?.name==="Math"&&memberName(node.callee)==="random"){
         const parentName=source.slice(Math.max(0,node.start-100),node.start).match(/\b(?:token|secret|key|session|nonce)\w*\s*[:=]\s*$/i);
         if(parentName)emit("js.weak-random",node,"Math.random() semble participer à la création d'un identifiant sensible.","medium");
