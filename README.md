@@ -1,8 +1,8 @@
-# IDA BugFix 2.0.9
+# IDA BugFix 2.1.0
 
 Plateforme web de diagnostic : dépôts GitHub publics, projets ZIP locaux et audits web via Google PageSpeed Insights / Lighthouse.
 
-## Nouveautés 2.0.9 — Analyse de projets ZIP
+## Nouveautés 2.1.0 — Analyse de projets ZIP
 - Import d’une archive ZIP depuis mobile ou ordinateur.
 - Analyse directement dans le navigateur : les fichiers ne sont pas téléversés.
 - Inspection statique de JavaScript, TypeScript, JSON, HTML, CSS, Python, PHP, Java, Go, Rust, SQL, YAML, TOML, Markdown, XML, Vue et Svelte.
@@ -21,7 +21,14 @@ Plateforme web de diagnostic : dépôts GitHub publics, projets ZIP locaux et au
 - L’URL du site est transmise à Google PageSpeed Insights.
 
 ## Limites et sécurité
-La version 2.0.9 est un outil de diagnostic statique. Elle ne comprend pas toutes les erreurs possibles, ne modifie pas le code, n’exécute pas les tests et ne garantit pas l’absence de bugs. Les alertes sont des pistes à vérifier. Le mode ZIP utilise JSZip chargé depuis jsDelivr ; une connexion est nécessaire pour charger cette bibliothèque. Les fichiers de l’archive restent dans le navigateur pendant l’analyse.
+La version 2.1.0 est un outil de diagnostic statique. Elle ne comprend pas toutes les erreurs possibles, ne modifie pas le code, n’exécute pas les tests et ne garantit pas l’absence de bugs. Les alertes sont des pistes à vérifier. Le mode ZIP utilise JSZip chargé depuis jsDelivr ; une connexion est nécessaire pour charger cette bibliothèque. Les fichiers de l’archive restent dans le navigateur pendant l’analyse.
 
 ## Utilisation
 Ouvrir l’application, choisir GitHub, Projet ZIP ou Audit web, puis lancer l’analyse.
+## Nouveautés 2.1.0 — Espace Pro
+- Historique local des 20 derniers diagnostics GitHub, ZIP et audits web.
+- Recherche textuelle et filtres par niveau de gravité dans les résultats.
+- Rapport professionnel imprimable depuis le navigateur (option « Enregistrer en PDF »).
+- Export JSON individuel et export de l'historique.
+- L'historique est stocké uniquement dans le navigateur de l'utilisateur et ne se synchronise pas entre appareils.
+- Aucun compte, serveur, paiement ou synchronisation cloud n'est inclus dans cette version.
