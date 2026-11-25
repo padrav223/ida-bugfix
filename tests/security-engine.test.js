@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 
 function loadEngine(fetchImpl = async () => ({ ok: true, json: async () => ({ results: [] }) })) {
-  const context = { window: {}, fetch: fetchImpl, console };
+  const context = { window: {}, fetch: fetchImpl, console, AbortController, setTimeout, clearTimeout };
   vm.runInNewContext(fs.readFileSync("security-engine.js", "utf8"), context);
   return context.window.IDASecurityEngine;
 }
