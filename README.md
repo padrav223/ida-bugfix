@@ -19,6 +19,12 @@ IDA BugFix propose trois entrées de diagnostic : dépôts GitHub publics, archi
 - Structure d'offres Free, Pro et Team et statut de licence administrable côté serveur.
 - Zone explicative réservée à l'exécution isolée des tests.
 
+## Exécution isolée des tests Node.js
+
+Un workflow manuel est disponible dans [GitHub Actions](https://github.com/padrav223/ida-bugfix/actions/workflows/isolated-node-tests.yml). Il accepte uniquement un dépôt GitHub public avec `package.json` et `package-lock.json` ou `npm-shrinkwrap.json`, puis exécute `npm test` (et facultativement `npm run lint`) dans un conteneur Docker sans réseau, sans jeton GitHub, avec limites CPU/mémoire/processus, système de fichiers racine en lecture seule et durée maximale du job. Les dépendances sont téléchargées avant l'exécution avec les scripts d'installation désactivés. Le déclenchement est manuel : l'application ne lance pas de code automatiquement.
+
+Ce runner prend actuellement en charge Node.js uniquement. Les plans Python, Go, Rust, PHP, Maven et Gradle sont des commandes proposées, pas des exécutions réelles.
+
 ## Moteur sécurité 2.4.0
 
 L'analyse AST suit certaines données non fiables dans le code JavaScript, mais sa propagation est limitée et peut produire des faux positifs ou manquer des chemins complexes. Elle ne prouve pas qu'une faille est exploitable. Les fichiers TypeScript, JSX et TSX ne sont pas analysés par l'AST Acorn dans cette version. L'audit OSV couvre uniquement les formats de verrouillage et versions reconnus ; il ne remplace pas un audit complet des dépendances. Si OSV.dev est inaccessible, le rapport signale que la vérification est incomplète au lieu de prétendre qu'aucune vulnérabilité n'existe.
