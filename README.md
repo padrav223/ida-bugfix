@@ -21,7 +21,7 @@ IDA BugFix propose trois entrées de diagnostic : dépôts GitHub publics, archi
 
 ## Moteur sécurité 2.3.0
 
-Les règles de secrets et les alertes de code restent des détections statiques : elles peuvent produire des faux positifs et ne prouvent pas qu'une faille est exploitable. L'audit OSV couvre uniquement les formats de verrouillage et versions reconnus ; il ne remplace pas un audit complet des dépendances. Si OSV.dev est inaccessible, le rapport signale que la vérification est incomplète au lieu de prétendre qu'aucune vulnérabilité n'existe.
+L'analyse AST suit certaines données non fiables dans le code JavaScript, mais sa propagation est limitée et peut produire des faux positifs ou manquer des chemins complexes. Elle ne prouve pas qu'une faille est exploitable. Les fichiers TypeScript, JSX et TSX ne sont pas analysés par l'AST Acorn dans cette version. L'audit OSV couvre uniquement les formats de verrouillage et versions reconnus ; il ne remplace pas un audit complet des dépendances. Si OSV.dev est inaccessible, le rapport signale que la vérification est incomplète au lieu de prétendre qu'aucune vulnérabilité n'existe.
 
 L'analyse ZIP vérifie les tailles décompressées déclarées par l'archive avant de lire les fichiers et refuse les entrées dépassant les limites configurées.
 
