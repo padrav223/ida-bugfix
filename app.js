@@ -108,3 +108,32 @@ $("reportBtn").addEventListener("click",()=>{
 });
 $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
 document.querySelectorAll(".nav-link").forEach(a=>a.addEventListener("click",()=>$("sidebar").classList.remove("open")));
+
+
+let lastSiteReport=null;
+async function runSiteAudit(raw){
+ let url;try{url=new URL(raw)}catch{throw Error("Adresse invalide. Entrez une URL complète, par exemple https://monsite.com.");}
+ if(!["http:","https:"].includes(url.protocol))throw Error("Seules les adresses HTTP et HTTPS sont acceptées.");
+ const site=url.href,strategy=$("siteStrategy").value,key=$("psiKey").value.trim();
+ $("siteResults").classList.remove("hidden");$("siteResultTitle").textContent="Audit en cours…";$("siteResultSubtitle").textContent=site;$("siteResults").scrollIntoView({behavior:"smooth"});
+ const q=new URLSearchParams({url:site,strategy});["performance","accessibility","best-practices","seo"].forEach(c=>q.append("category",c));if(key)q.set("key",key);
+ const res=await fetch("https://www.googleapis.com/pagespeedonline/v5/runPagespeed?"+q.toString());
+ const data=await res.json().catch(()=>({}));
+ if(!res.ok)throw Error((data.error&&data.error.message||"Google PageSpeed Insights n’a pas pu effectuer l’audit.")+(res.status===400||res.status===403?" Si une clé API est demandée, ajoutez-la dans le champ facultatif.":""));
+ const lr=data.lighthouseResult;if(!lr)throw Error("Aucun rapport Lighthouse reçu.");
+ const labels={performance:"Performances",accessibility:"Accessibilité","best-practices":"Bonnes pratiques",seo:"SEO"},ids=Object.keys(labels),audits=lr.audits||{};
+ const scores=ids.map(id=>({label:labels[id],score:lr.categories[id]&&lr.categories[id].score!=null?Math.round(lr.categories[id].score*100):null}));
+ const rows=[];ids.forEach(id=>{const cat=lr.categories[id];(cat&&cat.auditRefs||[]).forEach(ref=>{const a=audits[ref.id];if(a&&a.score!==null&&a.score<0.9&&!["notApplicable","manual","informative","debug"].includes(a.scoreDisplayMode))rows.push({category:labels[id],title:a.title,description:a.description||"",display:a.displayValue||"",score:a.score});});});
+ const metrics={"Premier affichage (FCP)":audits["first-contentful-paint"]?.displayValue,"Affichage principal (LCP)":audits["largest-contentful-paint"]?.displayValue,"Indice de vitesse":audits["speed-index"]?.displayValue,"Blocage total (TBT)":audits["total-blocking-time"]?.displayValue,"Stabilité visuelle (CLS)":audits["cumulative-layout-shift"]?.displayValue};
+ lastSiteReport={url:site,finalUrl:lr.finalUrl||site,strategy,fetchTime:lr.fetchTime,scores,metrics,diagnostics:rows.slice(0,50),source:"Google PageSpeed Insights / Lighthouse"};
+ const sh=$("siteScores");sh.replaceChildren();scores.forEach(s=>{const d=document.createElement("div");d.className="site-score";const n=document.createElement("strong");n.textContent=s.score===null?"—":s.score;const l=document.createElement("span");l.textContent=s.label;const track=document.createElement("div");track.className="score-track";const fill=document.createElement("i");fill.style.width=(s.score||0)+"%";track.append(fill);d.append(n,l,track);sh.append(d);});
+ const host=$("siteAuditList");host.replaceChildren();const mt=document.createElement("h3");mt.className="audit-subtitle";mt.textContent="Indicateurs de chargement";host.append(mt);
+ Object.entries(metrics).forEach(([k,v])=>{const p=document.createElement("p");p.className="metric-line";p.textContent=k+": "+(v||"Non disponible");host.append(p);});
+ const title=document.createElement("h3");title.className="audit-subtitle";title.textContent="Diagnostics à examiner ("+rows.length+")";host.append(title);
+ if(!rows.length){const p=document.createElement("p");p.className="metric-line";p.textContent="Aucun audit en échec détecté dans les catégories sélectionnées.";host.append(p);}
+ rows.slice(0,50).forEach(r=>{const el=document.createElement("article");el.className="finding";const badge=document.createElement("span");badge.className="severity "+(r.score===0?"high":r.score<0.5?"medium":"low");badge.textContent=r.category;const body=document.createElement("div"),h=document.createElement("h3"),p=document.createElement("p"),v=document.createElement("p");h.textContent=r.title;p.textContent=r.description;v.className="finding-detail";v.textContent=r.display;body.append(h,p,v);el.append(badge,body);host.append(el);});
+ $("siteResultTitle").textContent="Résultats — "+url.hostname;$("siteResultSubtitle").textContent=(strategy==="mobile"?"Test mobile":"Test ordinateur")+" · "+(lr.fetchTime||"");
+}
+$("siteForm").addEventListener("submit",async e=>{e.preventDefault();$("siteError").textContent="";const b=$("siteForm").querySelector('button[type="submit"]');b.disabled=true;b.textContent="Audit…";try{await runSiteAudit($("siteUrl").value.trim());}catch(err){$("siteError").textContent=err.message||"Erreur pendant l’audit.";$("siteResultTitle").textContent="Audit non terminé";}finally{b.disabled=false;b.textContent="Auditer →";}});
+$("siteResetBtn").addEventListener("click",()=>{$("siteResults").classList.add("hidden");$("siteUrl").value="";$("siteError").textContent="";lastSiteReport=null;});
+$("siteReportBtn").addEventListener("click",()=>{if(!lastSiteReport)return;const blob=new Blob([JSON.stringify(lastSiteReport,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ida-bugfix-audit-site.json";a.click();URL.revokeObjectURL(a.href);});
