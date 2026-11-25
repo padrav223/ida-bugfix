@@ -3,7 +3,7 @@ let lastZipReport=null;
 const zipPicker=document.getElementById("zipFile");
 document.getElementById("chooseZipBtn").addEventListener("click",()=>zipPicker.click());
 zipPicker.addEventListener("change",()=>{const file=zipPicker.files&&zipPicker.files[0];document.getElementById("zipFileName").textContent=file?file.name+" · "+(file.size/1024/1024).toFixed(2)+" Mo":"Aucun fichier sélectionné";document.getElementById("zipError").textContent="";});
-const ZIP_META_FILE=/(?:^|\/)(?:package-lock\.json|npm-shrinkwrap\.json|requirements(?:-prod)?\.txt|go\.mod|cargo\.lock|composer\.lock)$/i;
+const ZIP_META_FILE=/(?:^|\/)(?:package-lock\.json|npm-shrinkwrap\.json|requirements(?:-[a-z0-9_.-]+)?\.txt|go\.mod|cargo\.lock|composer\.lock)$/i;
 const ZIP_TEXT_EXT=/\.(?:js|jsx|ts|tsx|mjs|cjs|json|html|css|scss|md|yml|yaml|toml|py|php|java|go|rs|sql|sh|env|xml|vue|svelte|txt|mod|lock)$/i;
 const ZIP_SKIP=/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git|\.next|\.nuxt|\.venv|venv|__pycache__)(?:\/|$)/i;
 function zipFinding(level,title,file,line,description,recommendation){return {level,title,file,line,description,recommendation};}
@@ -45,4 +45,4 @@ document.getElementById("zipForm").addEventListener("submit",async e=>{
  finally{btn.disabled=false;btn.textContent="Analyser le ZIP →";}
 });
 document.getElementById("zipResetBtn").addEventListener("click",()=>{document.getElementById("zipResults").classList.add("hidden");document.getElementById("zipFile").value="";document.getElementById("zipFileName").textContent="Aucun fichier sélectionné";document.getElementById("zipError").textContent="";lastZipReport=null;});
-document.getElementById("zipReportBtn").addEventListener("click",()=>{if(!lastZipReport)return;const blob=new Blob([JSON.stringify(lastZipReport,null,2)],{type:"application/json;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ida-bugfix-2.0.9-rapport-zip.json";a.click();URL.revokeObjectURL(a.href);});
+document.getElementById("zipReportBtn").addEventListener("click",()=>{if(!lastZipReport)return;const blob=new Blob([JSON.stringify(lastZipReport,null,2)],{type:"application/json;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ida-bugfix-2.3.0-rapport-zip.json";a.click();URL.revokeObjectURL(a.href);});
