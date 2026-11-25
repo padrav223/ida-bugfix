@@ -4,7 +4,6 @@
 create table if not exists public.ida_profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   display_name text,
-  plan text not null default 'free' check (plan in ('free','pro','team')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -39,7 +38,7 @@ alter table public.ida_profiles enable row level security;
 alter table public.ida_reports enable row level security;
 alter table public.ida_licenses enable row level security;
 
-grant select, insert, update on public.ida_profiles to authenticated;
+grant select, insert on public.ida_profiles to authenticated;
 grant select, insert, delete on public.ida_reports to authenticated;
 grant select on public.ida_licenses to authenticated;
 
@@ -49,11 +48,6 @@ using ((select auth.uid()) = user_id);
 drop policy if exists "profile insert own" on public.ida_profiles;
 create policy "profile insert own" on public.ida_profiles for insert to authenticated
 with check ((select auth.uid()) = user_id);
-drop policy if exists "profile update own" on public.ida_profiles;
-create policy "profile update own" on public.ida_profiles for update to authenticated
-using ((select auth.uid()) = user_id)
-with check ((select auth.uid()) = user_id);
-
 drop policy if exists "reports read own" on public.ida_reports;
 create policy "reports read own" on public.ida_reports for select to authenticated
 using ((select auth.uid()) = user_id);
