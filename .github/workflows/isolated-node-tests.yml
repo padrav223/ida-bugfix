@@ -51,6 +51,8 @@ jobs:
           set -euo pipefail
           git clone --depth 1 --branch "$REF_NAME" -- "$REPOSITORY" target
           test -f target/package.json || { echo "::error::Ce runner prend actuellement en charge les projets Node.js avec package.json."; exit 3; }
+          repo_mb=$(du -sm target | cut -f1)
+          if (( repo_mb > 500 )); then echo "::error::Dépôt supérieur à 500 Mo."; exit 5; fi
           if [[ ! -f target/package-lock.json && ! -f target/npm-shrinkwrap.json ]]; then
             echo "::error::Un package-lock.json ou npm-shrinkwrap.json est requis pour une installation reproductible et sûre."
             exit 4
@@ -62,7 +64,9 @@ jobs:
           set -euo pipefail
           node <<'NODE'
           const fs = require("node:fs");
+          if (fs.statSync("target/package-lock.json").size > 10 * 1024 * 1024) throw new Error("package-lock.json dépasse 10 Mo");
           const lock = JSON.parse(fs.readFileSync("target/package-lock.json", "utf8"));
+          if (Object.keys(lock.packages || {}).length > 2000) throw new Error("Plus de 2 000 entrées de dépendances : limite du runner");
           const urls = [];
           const walk = value => {
             if (!value || typeof value !== "object") return;
@@ -83,9 +87,13 @@ jobs:
 
       - name: Installer les dépendances sans scripts
         shell: bash
+        env:
+          npm_config_registry: https://registry.npmjs.org
+          npm_config_proxy: ""
+          npm_config_https_proxy: ""
         run: |
           set -euo pipefail
-          npm ci --prefix target --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org --proxy=null --https-proxy=null
+          npm ci --prefix target --ignore-scripts --no-audit --no-fund
 
       - name: Précharger le runtime de test
         run: docker pull node:22-alpine
