@@ -1,6 +1,7 @@
 const $ = (id) => document.getElementById(id);
 let lastReport = null;
 const MAX_FILES = 60, MAX_FILE_BYTES = 150000;
+const SECRET_FILE = /^\.env(?:\.(?!example$|sample$|template$)[a-z0-9_-]+)?$/i;
 const TEXT_EXT = /\.(?:js|jsx|ts|tsx|mjs|cjs|json|html|css|scss|md|yml|yaml|toml|py|php|java|go|rs|sql|sh)$/i;
 function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function parseRepoUrl(value){
@@ -48,7 +49,7 @@ function renderFindings(findings){
 }
 function updateStats(files,findings){
   const cards=document.querySelectorAll(".stat-card .stat-value");
-  if(cards[0])cards[0].textContent="1";
+  if(cards[0])cards[0].textContent=String(files);
   if(cards[1])cards[1].textContent=String(findings.filter(x=>["critical","high","medium"].includes(x.level)).length);
   if(cards[2])cards[2].textContent="0";
 }
@@ -61,7 +62,8 @@ async function runScan(url){
   const branch=repoInfo.default_branch;
   const tree=await githubJSON(base+"/git/trees/"+encodeURIComponent(branch)+"?recursive=1");
   if(tree.truncated)throw Error("Le dépôt est trop volumineux pour une analyse complète via cette version. Analyse interrompue pour éviter un résultat trompeur.");
-  const candidates=(tree.tree||[]).filter(x=>x.type==="blob"&&TEXT_EXT.test(x.path)&&x.size<=MAX_FILE_BYTES&&!/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git)(?:\/|$)/.test(x.path));
+  const candidates=(tree.tree||[]).filter(x=>x.type==="blob"&&(TEXT_EXT.test(x.path)||SECRET_FILE.test(x.path.split("/").pop()))&&x.size<=MAX_FILE_BYTES&&!/(?:^|\/)(?:node_modules|vendor|dist|build|coverage|\.git)(?:\/|$)/.test(x.path));
+  candidates.sort((a,b)=>{const rank=x=>SECRET_FILE.test(x.path.split("/").pop())?0:x.path==="package.json"?1:2;return rank(a)-rank(b)||a.path.localeCompare(b.path);});
   const selected=candidates.slice(0,MAX_FILES), findings=[];
   let read=0, skipped=Math.max(0,candidates.length-selected.length);
   for(const item of selected){
