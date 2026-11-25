@@ -16,7 +16,7 @@
       }
       results.push(result);
     }
-    return {$schema:"https://json.schemastore.org/sarif-2.1.0.json",version:"2.1.0",runs:[{tool:{driver:{name:"IDA BugFix",semanticVersion:"2.3.0",informationUri:"https://padrav223.github.io/ida-bugfix/",rules:[...rules.values()]}},results,properties:{sourceKind:kind||"unknown",generatedAt:report?.generatedAt||new Date().toISOString(),repository:report?.repository||null,archive:report?.archive||null}}]};
+    return {$schema:"https://json.schemastore.org/sarif-2.1.0.json",version:"2.1.0",runs:[{tool:{driver:{name:"IDA BugFix",semanticVersion:"2.4.0",informationUri:"https://padrav223.github.io/ida-bugfix/",rules:[...rules.values()]}},results,properties:{sourceKind:kind||"unknown",generatedAt:report?.generatedAt||new Date().toISOString(),repository:report?.repository||null,archive:report?.archive||null}}]};
   }
   function download(report,kind,name){
     if(!report)return false;
