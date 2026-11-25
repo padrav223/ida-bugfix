@@ -18,3 +18,125 @@
 .zip-file-name{flex:1;min-width:140px;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
 .zip-picker button{min-height:44px}
 @media(max-width:640px){.zip-picker{align-items:stretch;flex-direction:column}.zip-picker button{width:100%;justify-content:center}.zip-file-name{padding:7px 2px;text-align:center}}
+
+
+/* ── IDA BugFix: interface refresh ── */
+:root{--bg:#f4f6f2;--panel:#fff;--panel2:#f8faf7;--line:#e1e8df;--text:#17251b;--muted:#667469;--green:#287844;--gold:#b28a35;--red:#b84b45;--radius:16px}
+html{scroll-padding-top:22px}
+body{background:var(--bg);color:var(--text);font-size:14px}
+.app-shell{min-height:100vh}
+.sidebar{width:232px;background:#14271a;border-right:1px solid #263c2b;padding:26px 16px}
+.brand{margin:0 0 42px 7px}
+.brand-mark{background:linear-gradient(145deg,#d8bd70,#a8893d);color:#1c2a1e;border-radius:11px}
+.brand b{color:#f4f7f1}
+.brand small{color:#d9bd70}
+.workspace-label{color:#8ca18f}
+.nav-link{color:#b5c3b6;border-radius:9px;padding:11px 12px}
+.nav-link span{font-size:16px}
+.nav-link.active,.nav-link:hover{background:#25432d;color:#fff}
+.sidebar-bottom{border-color:#35503a;color:#e7eee7}
+.sidebar-bottom small{color:#a6b6a8}
+.secure-dot,.status-pill i{background:#85cb91;box-shadow:none}
+.main-content{margin-left:232px;max-width:1500px;padding:0 clamp(22px,4vw,58px)}
+.topbar{height:68px;border-bottom-color:#e3e9e1;color:#68766b}
+.crumb b{color:#1a2a1e}
+.version-tag{border-color:#dce5da;color:#637368}
+.status-pill{border-color:#dce5da;color:#42634a;background:#fff}
+.avatar{background:#e3eee3;color:#286b3c}
+.welcome{min-height:300px;padding:48px 0 34px}
+.welcome h1{font-size:clamp(36px,4.2vw,54px);letter-spacing:-2px;color:#1a2b1e}
+.welcome h1 em{color:#287844}
+.welcome p{color:#647267;line-height:1.75}
+.eyebrow{color:#347d49;font-size:10px;letter-spacing:1.7px}
+.button{border-radius:9px;padding:11px 16px;font-size:12px;min-height:40px}
+.primary{background:#287844;color:white;box-shadow:0 3px 8px #28784420}
+.primary:hover{background:#21683a}
+.secondary{background:#f4f7f2;color:#294631;border:1px solid #dce6da}
+.hero-art{margin-right:4%}
+.core{background:linear-gradient(145deg,#edf6eb,#dcebdc);border-color:#a9c9ad;box-shadow:0 10px 35px #347d4918}
+.core span{color:#9a782d}.core b{color:#287844}
+.orbit{border-color:#6d9e7655}.orbit-two{border-color:#c2a45c66}
+.float-tag{background:#fff;border-color:#dce8da;color:#3d6645;box-shadow:0 5px 18px #1a2b1e0d}
+.stats-grid{gap:14px;margin:0 0 22px}
+.stat-card,.panel{background:#fff;border-color:#e1e8df;box-shadow:0 5px 20px #1c321b08}
+.stat-card{padding:17px 19px;border-radius:14px}
+.stat-icon{background:#e8f2e7;color:#287844}
+.stat-icon.amber{background:#f7f0df;color:#9b772c}
+.stat-icon.green{background:#e7f1e8;color:#287844}
+.stat-value{color:#17251b;font-size:25px}
+.stat-label{color:#314437}
+.stat-card small{color:#839087}
+.panel{padding:25px;margin:0 0 18px;border-radius:15px;scroll-margin-top:18px}
+.section-heading{align-items:center}
+.section-heading h2,.how-section h2{font-size:21px;color:#19291e;letter-spacing:-.45px}
+.section-heading p{max-width:680px;color:#6b786e;line-height:1.65;font-size:12px}
+.step-badge,.demo-label{color:#8b6a24;background:#fbf7e9;border-color:#eadfbd}
+.scan-form{margin-top:22px}
+.scan-form label{color:#34483a;font-size:12px}
+.input-row{background:#fbfcfa;border-color:#dce5db;border-radius:10px}
+.input-prefix{color:#347d49}
+.input-row input{color:#17251b}
+.input-row input::placeholder{color:#98a39a}
+.form-note{color:#758278;line-height:1.55}
+.form-error{color:#b84b45}
+.demo-callout{border-top-color:#e8eee6}
+.demo-callout b{color:#263b2b}
+.demo-callout p{color:#718075}
+.notice{background:#fbf7e9;border-color:#eadfbd;color:#745c25;line-height:1.6}
+.findings-list{gap:9px}
+.finding{background:#fbfcfa;border-color:#e3eae1;border-radius:10px;padding:13px}
+.finding h3{color:#26392b;font-size:12px}
+.finding p{color:#6d7b70;line-height:1.6}
+.finding code{color:#47714e}
+.finding .file{color:#758379}
+.severity.high{background:#fbe9e7;color:#a63e38}
+.severity.medium{background:#fbf2dc;color:#87641e}
+.severity.low{background:#e9f3e9;color:#347344}
+.panel-footer{border-top:1px solid #edf1eb;padding-top:15px}
+.how-section{padding:27px 0 42px}
+.how-section h2{font-size:25px}
+.how-grid article{border-top-color:#cbd9ca}
+.how-grid article span{color:#9a782d}
+.how-grid h3{color:#293d2e}
+.how-grid p{color:#728075;line-height:1.65}
+footer{border-top-color:#e0e8df;color:#7a877d;padding:18px 0 24px}
+footer a{color:#287844}
+.zip-picker{padding:13px;border:1px dashed #cbdac9;border-radius:11px;background:#fbfcfa}
+.zip-file-name{color:#6d7b70}
+.zip-summary{background:#eef5ed;color:#294a31;border:1px solid #dce9da}
+.site-options select,.api-key-details input{background:#fbfcfa;color:#24382a;border-color:#dce5db}
+.api-key-details summary{color:#3d6245}
+.site-score{background:#fbfcfa;border-color:#e1e8df}
+.site-score strong{color:#1b2d20}
+.site-score span{color:#718075}
+.score-track{background:#e6ede4}
+.score-track i{background:#3b8a50}
+.metric-line{color:#68776c}
+.audit-subtitle{color:#2b4030}
+@media(max-width:900px){.sidebar{width:215px}.main-content{margin-left:215px;padding:0 24px}}
+@media(max-width:650px){
+ .sidebar{width:270px;background:#14271a}
+ .main-content{margin-left:0;padding:0 16px}
+ .topbar{height:60px}
+ .welcome{padding:34px 0 24px}
+ .welcome h1{font-size:39px;letter-spacing:-1.6px}
+ .stats-grid{grid-template-columns:1fr;gap:8px}
+ .stat-card{display:grid;grid-template-columns:34px 1fr;column-gap:10px;align-items:center;padding:12px 14px}
+ .stat-icon{grid-row:span 2}
+ .stat-value{font-size:19px;margin:0}
+ .stat-label{grid-column:2;font-size:11px}
+ .stat-card small{display:none}
+ .panel{padding:18px 14px;margin-bottom:14px}
+ .section-heading{align-items:flex-start}
+ .section-heading h2{font-size:18px}
+ .section-heading p{font-size:11px}
+ .step-badge{font-size:8px;padding:5px 6px}
+ .input-row{padding:5px}
+ .input-row input{padding:9px 0}
+ .input-row button{margin-top:4px}
+ .zip-picker{padding:10px}
+ .finding{padding:11px;gap:9px}
+ .finding .file{overflow-wrap:anywhere;white-space:normal}
+ .how-section{padding:22px 0 32px}
+ footer{font-size:9px}
+}
