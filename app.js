@@ -82,7 +82,7 @@ async function runScan(url){
   if(!findings.length)findings.push(finding("info","Aucun problème détecté par les règles activées","—",0,"L'analyse statique limitée n'a pas trouvé les motifs recherchés. Cela ne garantit pas l'absence de bugs.","Exécuter les tests du projet et faire une revue humaine."));
   const counts={critical:0,high:0,medium:0,low:0,info:0};findings.forEach(f=>counts[f.level]=(counts[f.level]||0)+1);
   const summary={repository:owner+"/"+repo,branch,filesRead:read,filesConsidered:selected.length,filesSkipped:skipped,counts,findings,generatedAt:new Date().toISOString(),scripts};
-  lastReport=summary;renderFindings(findings);updateStats(read,findings);
+  lastReport=summary;renderFindings(findings);updateStats(read,findings);window.dispatchEvent(new CustomEvent("ida:report-ready",{detail:{kind:"github",report:summary}}));
   $("analysisTitle").textContent="Diagnostic réel — "+owner+"/"+repo;
   $("analysisSubtitle").textContent=read+" fichiers inspectés · branche "+branch+" · "+findings.length+" observations";
   const notice=$("analysisPanel").querySelector(".notice");
@@ -125,7 +125,7 @@ async function runSiteAudit(raw){
  const scores=ids.map(id=>({label:labels[id],score:lr.categories[id]&&lr.categories[id].score!=null?Math.round(lr.categories[id].score*100):null}));
  const rows=[];ids.forEach(id=>{const cat=lr.categories[id];(cat&&cat.auditRefs||[]).forEach(ref=>{const a=audits[ref.id];if(a&&a.score!==null&&a.score<0.9&&!["notApplicable","manual","informative","debug"].includes(a.scoreDisplayMode))rows.push({category:labels[id],title:a.title,description:a.description||"",display:a.displayValue||"",score:a.score});});});
  const metrics={"Premier affichage (FCP)":audits["first-contentful-paint"]?.displayValue,"Affichage principal (LCP)":audits["largest-contentful-paint"]?.displayValue,"Indice de vitesse":audits["speed-index"]?.displayValue,"Blocage total (TBT)":audits["total-blocking-time"]?.displayValue,"Stabilité visuelle (CLS)":audits["cumulative-layout-shift"]?.displayValue};
- lastSiteReport={url:site,finalUrl:lr.finalUrl||site,strategy,fetchTime:lr.fetchTime,scores,metrics,diagnostics:rows.slice(0,50),source:"Google PageSpeed Insights / Lighthouse"};
+ lastSiteReport={url:site,finalUrl:lr.finalUrl||site,strategy,fetchTime:lr.fetchTime,scores,metrics,diagnostics:rows.slice(0,50),source:"Google PageSpeed Insights / Lighthouse"};window.dispatchEvent(new CustomEvent("ida:report-ready",{detail:{kind:"site",report:lastSiteReport}}));
  const sh=$("siteScores");sh.replaceChildren();scores.forEach(s=>{const d=document.createElement("div");d.className="site-score";const n=document.createElement("strong");n.textContent=s.score===null?"—":s.score;const l=document.createElement("span");l.textContent=s.label;const track=document.createElement("div");track.className="score-track";const fill=document.createElement("i");fill.style.width=(s.score||0)+"%";track.append(fill);d.append(n,l,track);sh.append(d);});
  const host=$("siteAuditList");host.replaceChildren();const mt=document.createElement("h3");mt.className="audit-subtitle";mt.textContent="Indicateurs de chargement";host.append(mt);
  Object.entries(metrics).forEach(([k,v])=>{const p=document.createElement("p");p.className="metric-line";p.textContent=k+": "+(v||"Non disponible");host.append(p);});
