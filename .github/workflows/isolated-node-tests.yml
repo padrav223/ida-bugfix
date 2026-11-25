@@ -56,11 +56,36 @@ jobs:
             exit 4
           fi
 
+      - name: Vérifier les URL des paquets verrouillés
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require("node:fs");
+          const lock = JSON.parse(fs.readFileSync("target/package-lock.json", "utf8"));
+          const urls = [];
+          const walk = value => {
+            if (!value || typeof value !== "object") return;
+            if (typeof value.resolved === "string") urls.push(value.resolved);
+            for (const child of Object.values(value)) walk(child);
+          };
+          walk(lock);
+          for (const raw of urls) {
+            if (raw.startsWith("file:")) continue;
+            let url;
+            try { url = new URL(raw); } catch { throw new Error("URL de dépendance invalide dans le lockfile"); }
+            if (url.protocol !== "https:" || url.hostname !== "registry.npmjs.org") {
+              throw new Error("Dépendance externe bloquée : " + url.hostname);
+            }
+          }
+          console.log("URL de dépendances validées :", urls.length);
+          NODE
+
       - name: Installer les dépendances sans scripts
         shell: bash
         run: |
           set -euo pipefail
-          npm ci --prefix target --ignore-scripts --no-audit --no-fund
+          npm ci --prefix target --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org --proxy=null --https-proxy=null
 
       - name: Précharger le runtime de test
         run: docker pull node:22-alpine
