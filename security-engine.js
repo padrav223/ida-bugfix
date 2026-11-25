@@ -51,7 +51,7 @@
             walk(j.dependencies);
           }
         }catch{}
-      }else if(base==="requirements.txt"||base==="requirements-prod.txt"){
+      }else if(base==="requirements.txt"||/^requirements-.+\.txt$/.test(base)){
         for(const line of text.split(/\r?\n/)){const m=line.match(/^\s*([A-Za-z0-9_.-]+)(?:\[[^\]]+\])?\s*==\s*([A-Za-z0-9_.+-]+)/);if(m)addPkg(out,m[1],m[2],"PyPI",path);}
       }else if(base==="go.mod"){
         let inBlock=false;
