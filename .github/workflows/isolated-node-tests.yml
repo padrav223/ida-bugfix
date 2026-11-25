@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       ref:
-        description: "Branche, tag ou commit à tester"
+        description: "Branche ou tag à tester"
         required: true
         default: "main"
         type: string
@@ -51,16 +51,16 @@ jobs:
           set -euo pipefail
           git clone --depth 1 --branch "$REF_NAME" -- "$REPOSITORY" target
           test -f target/package.json || { echo "::error::Ce runner prend actuellement en charge les projets Node.js avec package.json."; exit 3; }
+          if [[ ! -f target/package-lock.json && ! -f target/npm-shrinkwrap.json ]]; then
+            echo "::error::Un package-lock.json ou npm-shrinkwrap.json est requis pour une installation reproductible et sûre."
+            exit 4
+          fi
 
       - name: Installer les dépendances sans scripts
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -f target/package-lock.json || -f target/npm-shrinkwrap.json ]]; then
-            npm ci --prefix target --ignore-scripts --no-audit --no-fund
-          else
-            npm install --prefix target --ignore-scripts --no-audit --no-fund
-          fi
+          npm ci --prefix target --ignore-scripts --no-audit --no-fund
 
       - name: Précharger le runtime de test
         run: docker pull node:22-alpine
@@ -88,7 +88,7 @@ jobs:
             --env RUN_LINT="$RUN_LINT" \
             node:22-alpine \
             sh -euc '
-              cp -R /input/. /work/
+              for item in /input/.[!.]* /input/*; do [ -e "$item" ] || continue; [ "$(basename "$item")" = ".git" ] && continue; cp -R "$item" /work/; done
               node -e "if (!require(\"./package.json\").scripts?.test) { console.error(\"Aucun script test dans package.json\"); process.exit(3); }"
               echo "=== npm test ==="
               npm test
