@@ -37,7 +37,10 @@ test("détecte une XSS DOM par affectation innerHTML", () => {
     "const message = params.get('message');",
     "element.innerHTML = message;"
   ].join("\n"));
-  assert.ok(result.findings.some(x => x.ruleId === "js.dom-xss"));
+  const xss = result.findings.find(x => x.ruleId === "js.dom-xss");
+  assert.ok(xss);
+  assert.equal(xss.suggestedChange.after, "element.textContent = message");
+  assert.equal(xss.suggestedChange.requiresReview, true);
 });
 
 test("détecte les options TLS dangereuses et les hachages faibles", () => {
@@ -45,8 +48,12 @@ test("détecte les options TLS dangereuses et les hachages faibles", () => {
     "const options = { rejectUnauthorized: false };",
     "const digest = crypto.createHash('md5');"
   ].join("\n"));
-  assert.ok(result.findings.some(x => x.ruleId === "js.insecure-tls"));
-  assert.ok(result.findings.some(x => x.ruleId === "js.weak-hash"));
+  const tls = result.findings.find(x => x.ruleId === "js.insecure-tls");
+  assert.ok(tls);
+  assert.ok(tls.suggestedChange.after.includes("true"));
+  const hash = result.findings.find(x => x.ruleId === "js.weak-hash");
+  assert.ok(hash);
+  assert.ok(hash.suggestedChange.after.includes("sha256"));
 });
 
 test("n'émet pas d'alerte SQL pour une entrée constante sans source non fiable", () => {

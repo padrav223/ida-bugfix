@@ -8,7 +8,7 @@
     for(const f of findings){
       const ruleId=String(f.ruleId||("IDA/"+slug(f.title)));
       if(!rules.has(ruleId))rules.set(ruleId,{id:ruleId,name:ruleId,shortDescription:{text:String(f.title||"IDA BugFix finding")},help:{text:String(f.fix||f.recommendation||"Review this finding and verify the suggested remediation.")}});
-      const result={ruleId,level:levelMap[f.level]||"warning",message:{text:[f.title,f.description].filter(Boolean).join(": ")||"Finding reported by IDA BugFix."},properties:{severity:f.level||"medium",confidence:f.confidence||"heuristic",source:f.source||"IDA BugFix",remediation:f.fix||f.recommendation||""}};
+      const result={ruleId,level:levelMap[f.level]||"warning",message:{text:[f.title,f.description].filter(Boolean).join(": ")||"Finding reported by IDA BugFix."},properties:{severity:f.level||"medium",confidence:f.confidence||"heuristic",source:f.source||"IDA BugFix",remediation:f.fix||f.recommendation||"",suggestedChange:f.suggestedChange||null}};
       if(f.file&&f.file!=="—"){
         const physicalLocation={artifactLocation:{uri:String(f.file).replace(/\\/g,"/")}};
         if(Number(f.line)>0)physicalLocation.region={startLine:Number(f.line)};

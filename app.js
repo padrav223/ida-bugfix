@@ -46,7 +46,7 @@ function renderFindings(findings){
     const sev=document.createElement("span");sev.className="severity "+(f.level==="critical"||f.level==="high"?"high":f.level==="medium"?"medium":"low");sev.textContent=f.level.toUpperCase();
     const body=document.createElement("div"),h=document.createElement("h3"),p=document.createElement("p"),detail=document.createElement("p"),code=document.createElement("code"),file=document.createElement("span");
     h.textContent=f.title;p.textContent=f.description;code.textContent=f.fix;detail.append(code);file.className="file";file.textContent=f.file+(f.line?" · ligne "+f.line:"");
-    body.append(h,p,detail);el.append(sev,body,file);host.append(el);
+    body.append(h,p,detail);if(f.suggestedChange){const preview=document.createElement("pre");preview.className="finding-detail";preview.textContent="AVANT : "+f.suggestedChange.before+"\nAPRÈS : "+f.suggestedChange.after+"\nÀ vérifier avant application.";body.append(preview);}el.append(sev,body,file);host.append(el);
   }
 }
 function updateStats(files,findings){
@@ -110,6 +110,7 @@ $("reportBtn").addEventListener("click",()=>{
   a.href=URL.createObjectURL(blob);a.download="ida-bugfix-rapport.json";a.click();URL.revokeObjectURL(a.href);
 });
 $("sarifReportBtn").addEventListener("click",()=>{if(!lastReport){$("formError").textContent="Aucun rapport réel à exporter.";return;}window.IDASarif?.download(lastReport,"github","ida-bugfix-github.sarif");});
+$("suggestionReportBtn").addEventListener("click",()=>{if(!lastReport)return;const items=lastReport.findings.filter(f=>f.suggestedChange);if(!items.length){$("formError").textContent="Aucune proposition prudente dans ce rapport.";return;}const blob=new Blob([JSON.stringify({warning:"Propositions non appliquées. Revue humaine obligatoire.",changes:items.map(f=>({file:f.file,line:f.line,ruleId:f.ruleId,title:f.title,...f.suggestedChange}))},null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ida-bugfix-propositions.json";a.click();URL.revokeObjectURL(a.href);});
 $("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
 document.querySelectorAll(".nav-link").forEach(a=>a.addEventListener("click",()=>$("sidebar").classList.remove("open")));
 
