@@ -11,3 +11,10 @@
 #zipResults{margin-top:20px}
 #zipResults .panel-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
 @media(max-width:640px){.zip-input-row{display:flex;flex-direction:column;align-items:stretch}.zip-input-row input[type=file]{width:100%;box-sizing:border-box}.zip-input-row button{width:100%}#zipResults .panel-footer{flex-direction:column}#zipResults .panel-footer button{width:100%}}
+
+/* Mobile-friendly ZIP picker */
+.zip-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}
+.visually-hidden-file{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.zip-file-name{flex:1;min-width:140px;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.zip-picker button{min-height:44px}
+@media(max-width:640px){.zip-picker{align-items:stretch;flex-direction:column}.zip-picker button{width:100%;justify-content:center}.zip-file-name{padding:7px 2px;text-align:center}}
