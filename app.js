@@ -3,7 +3,7 @@ let lastReport = null;
 // Scanner revision: prioritise environment files and package metadata before the general file cap.
 const MAX_FILES = 60, MAX_FILE_BYTES = 150000;
 const SECRET_FILE = /^\.env(?:\.(?!example$|sample$|template$)[a-z0-9_-]+)?$/i;
-const LOCK_FILE = /(?:^|\/)(?:package-lock\.json|npm-shrinkwrap\.json|requirements(?:-prod)?\.txt|go\.mod|cargo\.lock|composer\.lock)$/i;
+const LOCK_FILE = /(?:^|\/)(?:package-lock\.json|npm-shrinkwrap\.json|requirements(?:-[a-z0-9_.-]+)?\.txt|go\.mod|cargo\.lock|composer\.lock)$/i;
 const TEXT_EXT = /\.(?:js|jsx|ts|tsx|mjs|cjs|json|html|css|scss|md|yml|yaml|toml|py|php|java|go|rs|sql|sh|txt|mod|lock)$/i;
 function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function parseRepoUrl(value){
@@ -83,7 +83,7 @@ async function runScan(url){
   if(!read)findings.push(finding("info","Aucun fichier texte analysable","—",0,"Aucun fichier compatible n'a pu être récupéré dans les limites définies.","Vérifier la visibilité du dépôt et les types de fichiers."));
   if(!findings.length)findings.push(finding("info","Aucun problème détecté par les règles activées","—",0,"L'analyse statique limitée n'a pas trouvé les motifs recherchés. Cela ne garantit pas l'absence de bugs.","Exécuter les tests du projet et faire une revue humaine."));
   const counts={critical:0,high:0,medium:0,low:0,info:0};findings.forEach(f=>counts[f.level]=(counts[f.level]||0)+1);
-  const summary={repository:owner+"/"+repo,branch,filesRead:read,filesConsidered:selected.length,filesSkipped:skipped,counts,findings,engines:{static:"IDA rules",secrets:"IDA Secret Rules",dependencies:"OSV.dev",dependencyPackages:dependencyAudit.packages,dependencyStatus:dependencyAudit.status},generatedAt:new Date().toISOString(),scripts};
+  const summary={version:"2.3.0",repository:owner+"/"+repo,branch,filesRead:read,filesConsidered:selected.length,filesSkipped:skipped,counts,findings,engines:{static:"IDA rules",secrets:"IDA Secret Rules",dependencies:"OSV.dev",dependencyPackages:dependencyAudit.packages,dependencyStatus:dependencyAudit.status},generatedAt:new Date().toISOString(),scripts};
   lastReport=summary;renderFindings(findings);updateStats(read,findings);window.dispatchEvent(new CustomEvent("ida:report-ready",{detail:{kind:"github",report:summary}}));
   $("analysisTitle").textContent="Diagnostic réel — "+owner+"/"+repo;
   $("analysisSubtitle").textContent=read+" fichiers inspectés · branche "+branch+" · "+findings.length+" observations";
