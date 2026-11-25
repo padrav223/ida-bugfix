@@ -1,0 +1,44 @@
+name: IDA BugFix quality gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests et vérifications Node.js ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Installer les dépendances sans scripts
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+
+      - name: Vérifier la syntaxe
+        run: npm run check
+
+      - name: Exécuter les tests
+        run: npm test
